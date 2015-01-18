@@ -1,0 +1,6 @@
+[Activity]
+name = CEdit
+activity_version = 3
+bundle_id = org.sugarlabs.CEdit
+exec = sugar-activity CEdit.CEdit
+icon = icon
