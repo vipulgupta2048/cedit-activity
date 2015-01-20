@@ -192,7 +192,7 @@ class FileChooserOpen(Gtk.Window):
                     GObject.idle_add(self.emit, 'open-file', path)
                     self.emit('open-file', path)
                     self.selected_path = None
-            
+
             else:
                 if directory:
                     self.folder = directory

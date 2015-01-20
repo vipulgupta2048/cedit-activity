@@ -53,7 +53,8 @@ STYLES = STYLE_MANAGER.get_scheme_ids()
 
 # FIXME: There must be many more exceptions.
 BAD_LANGUAGES = {'c++': 'cpp',
-                 '.desktop': 'desktop'}
+                 '.desktop': 'desktop',
+                 'marcar': 'markdown'}
 
 
 def get_pixbuf_from_path(path, size=62):
@@ -110,7 +111,7 @@ def get_language_from_file(path):
 
     if not language:
         type = Gio.content_type_guess(path, [])[0]
-        
+
         if 'x-' in type:
             type = type.replace('x-', '')
         if 'text/' in type:
