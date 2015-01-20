@@ -51,6 +51,11 @@ LANGUAGES = LANGUAGE_MANAGER.get_language_ids()
 STYLE_MANAGER = GtkSource.StyleSchemeManager()
 STYLES = STYLE_MANAGER.get_scheme_ids()
 
+STYLES_PATH = os.path.join(os.path.dirname(__file__), 'styles/')
+STYLE_MANAGER = GtkSource.StyleSchemeManager()
+STYLE_MANAGER.append_search_path(STYLES_PATH)
+STYLES = STYLE_MANAGER.get_scheme_ids()
+
 # FIXME: There must be many more exceptions.
 BAD_LANGUAGES = {'c++': 'cpp',
                  '.desktop': 'desktop',

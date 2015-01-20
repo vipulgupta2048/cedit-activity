@@ -656,6 +656,7 @@ class View(GtkSource.View):
         self.buffer = Buffer()
         self.file = None
         self.conf = None
+        self.style_manager = G.STYLE_MANAGER
         self.tag_search = self.buffer.create_tag(
             'search', foreground='#5E82FF', background='#078D00')
 
@@ -677,7 +678,6 @@ class View(GtkSource.View):
 
     def set_conf(self, conf):
         self.conf = conf
-        style_manager = GtkSource.StyleSchemeManager()
         font = '%s %d' % (conf['font'], conf['font-size'])
 
         if conf['wrap-mode'] == 'none':
@@ -692,7 +692,7 @@ class View(GtkSource.View):
         self.modify_font(Pango.FontDescription(font))
         self.set_tab_width(conf['tab-width'])
         self.set_insert_spaces_instead_of_tabs(conf['use-spaces'])
-        self.buffer.set_style_scheme(style_manager.get_scheme(conf['theme']))
+        self.buffer.set_style_scheme(self.style_manager.get_scheme(conf['theme']))
         self.set_show_line_numbers(conf['show-line-numbers'])
         self.set_show_right_margin(conf['show-right-line'])
         self.set_right_margin_position(conf['right-line-pos'])
@@ -816,8 +816,8 @@ class ComboStyles(Gtk.ToolItem):
     def __init__(self, selected_style='classic'):
         Gtk.ToolItem.__init__(self)
 
-        style_manager = GtkSource.StyleSchemeManager()
-        self.styles = style_manager.get_scheme_ids()
+        self.style_manager = G.STYLE_MANAGER
+        self.styles = G.STYLES
         self.combo = Gtk.ComboBoxText()
 
         for style in self.styles:

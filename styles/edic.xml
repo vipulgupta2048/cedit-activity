@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style-scheme id="edic" _name="EdiC" version="1.0">
+
+  <author>T_i_T_i</author>
+  <_description>For all programming languages especially C, C++, Java | V 2.0</_description>
+
+<!--
+XML gEdit color configuration by T_i_T_i
+
+To read this XML document with the maximum comfort
+please open it with the default gEdit font (Monospace 10)
+
+    ()()
+   (°°)
+    °
+
+-->
+
+<color name="blanc" value="#ffffff"/>	<!-- Background -->
+<color name="noir" value="#000000"/>	<!-- Text -->
+<color name="bleue" value="#4c39ff"/>	<!-- Keywords -->
+<color name="orange" value="#ffa200"/>	<!-- preprocessor -->
+<color name="gris" value="#888888"/>
+<color name="fonce" value="#272727"/>
+<color name="median" value="#e7e7e7"/>  <!-- Selection unfocused -->
+<color name="cl" value="#dcdcdc"/>	    <!-- Current line -->
+<color name="vert" value="#61de44"/>
+<color name="bleuecomments" value="#4e7ae8"/> <!-- Comments -->
+
+<color name="ciel" value="#c1c1c1"/> 	      <!-- Selection -->
+<color name="rouge" value="#ff0000"/>
+<color name="ofonce" value="#ff6c00"/>
+<color name="otresfonce" value="#ff5a00"/>    <!-- Special -->
+<color name="jauneclair" value="#7eff00"/>
+<color name="dore" value="#bcaa16"/>
+<color name="grisclair" value="#e5e5e5"/>
+
+<!-- BASIQUES -->
+
+<style name="text"                        foreground="fonce"        background="blanc"/>
+<style name="selection"                   foreground="noir"         background="ciel"/>
+<style name="selection-unfocused"         foreground="noir"         background="median"/>
+<style name="current-line"                background="cl"/>
+<style name="draw-spaces"                 background="cl"/>
+<style name="bracket-match"               bold="true"/>
+
+<!-- SPECIAL C -->
+
+<style name="def:keyword"                   foreground="bleue"       bold="true"/>
+<style name="def:preprocessor"              foreground="vert"        bold="true"/>
+<style name="def:comment"                   foreground="gris"        italic="true"/>
+<style name="def:escaped-character"         foreground="rouge"/>
+<style name="def:included-file"             foreground="vert"        bold="true"/>
+<style name="def:type"         	 	        foreground="orange"      bold="true"/>
+<style name="def:storage-class"        	    foreground="ofonce"      bold="true"/>
+<style name="def:char"         		        foreground="rouge"/>
+<style name="def:decimal"            	    foreground="rouge"/>
+<style name="def:octal"            	        foreground="rouge"/>
+<style name="def:hexadecimal"          	    foreground="rouge"/>
+<style name="def:boolean"            	    foreground="bleue"       bold="true"/>
+<style name="def:common-defines"            foreground="rouge"       bold="true"/>
+<style name="c:common-defines"              foreground="rouge"       bold="true"/>
+
+<!-- AUTRES -->
+
+<style name="bracket-match" 		  bold="true" foreground="bleue" background="blanc" />
+<style name="def:special-char"        foreground="rouge"/>
+<style name="def:string"              foreground="dore"/>
+<style name="line-numbers"		      foreground="fonce"             background="grisclair"/>
+
+</style-scheme>
+
