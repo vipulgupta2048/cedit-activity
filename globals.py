@@ -76,7 +76,7 @@ def get_pixbuf_from_path(path, size=62):
         icon = info.get_icon()
         types = icon.get_names()
 
-        print path, types
+        #print path, types
 
         if os.path.ismount(path):
             return GdkPixbuf.Pixbuf.new_from_file_at_size(MOUNT, size, size)

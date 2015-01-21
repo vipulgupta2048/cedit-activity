@@ -134,7 +134,6 @@ class FileChooserOpen(Gtk.Window):
     def __key_release_event_cb(self, widget, event):
         if event.keyval == 65293:  # Enter
             self.__open_path()
-            self.close()
 
         elif event.keyval == 65288:  # BackSpace
             self.go_up()
@@ -172,40 +171,30 @@ class FileChooserOpen(Gtk.Window):
         self.show_folder()
 
     def __open_path(self, button=None):
-        if len(self.view.get_selected_items()) == 1:
-            if os.path.isdir(self.selected_path):
-                self.folder = self.selected_path
+        files = []
+        directory = None
+
+        for item in self.view.get_selected_items():
+            iter = self.model.get_iter(item)
+            path = os.path.join(self.folder, self.model.get_value(iter, 0))
+
+            if os.path.isfile(path):
+                files.append(path)
+
+            elif os.path.isdir(path) and not directory:
+                directory = path
+
+        if files:
+            for path in files:
+                GObject.idle_add(self.emit, 'open-file', path)
+                self.emit('open-file', path)
                 self.selected_path = None
 
-            elif os.path.isfile(self.selected_path):
-                self.emit('open-file', self.selected_path)
+            self.destroy()
 
         else:
-            files = []
-            directory = None
-
-            for item in self.view.get_selected_items():
-                iter = self.model.get_iter(item)
-                path = os.path.join(self.folder, self.model.get_value(iter, 0))
-
-                if os.path.isfile(path):
-                    files.append(path)
-
-                elif os.path.isdir(path) and not directory:
-                    directory = path
-
-            if files:
-                for path in files:
-                    GObject.idle_add(self.emit, 'open-file', path)
-                    self.emit('open-file', path)
-                    self.selected_path = None
-
-            else:
-                if directory:
-                    self.folder = directory
-                    return  # Evit destroy
-
-            self.destroy()
+            if directory:
+                self.folder = directory
 
     def __open_path_from_entry(self, entry):
         path = self.entry.get_text()
