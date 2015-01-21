@@ -151,6 +151,7 @@ class FileChooserOpen(Gtk.Window):
         for folder in self.folder.split('/'):
             if not folder:
                 continue
+
             folders.append(folder)
 
         if not folders:
@@ -217,14 +218,18 @@ class FileChooserOpen(Gtk.Window):
         alert.props.msg = _(
             "Apparently you've selected a file that does not exist.")
         image = Gtk.Image.new_from_stock(Gtk.STOCK_OK, Gtk.IconSize.MENU)
-        alert.add_button(Gtk.ResponseType.NO, _('Ok'), icon=image)
+
+        hbox = alert.get_children()[0]
+        buttonbox = hbox.get_children()[1]
+        button = buttonbox.get_children()[0]
+        buttonbox.remove(button)
 
         alert.connect('response', self.__alert_response)
 
         self.vbox.pack_start(alert, False, False, 0)
         self.vbox.reorder_child(alert, 1)
 
-    def __alert_response(self, alert):
+    def __alert_response(self, alert, response):
         self.vbox.remove(alert)
 
     def check_files(self):
@@ -789,6 +794,10 @@ class View(GtkSource.View):
 
             self.file = path
             self.emit_title_changed()
+
+            readable, writable = G.get_path_access(path)
+
+            self.set_editable(writable)
 
     def save_file(self, path):
         self.buffer.set_modified(False)

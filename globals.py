@@ -76,7 +76,7 @@ def get_pixbuf_from_path(path, size=62):
         icon = info.get_icon()
         types = icon.get_names()
 
-        #print path, types
+        # print path, types
 
         if os.path.ismount(path):
             return GdkPixbuf.Pixbuf.new_from_file_at_size(MOUNT, size, size)
@@ -132,3 +132,8 @@ def get_language_from_file(path):
         language = LANGUAGE_MANAGER.get_language(type)
 
     return language
+
+
+def get_path_access(path):
+    #  R_OK = Readable, W_OK = Writable
+    return os.access(path, os.R_OK), os.access(path, os.W_OK)

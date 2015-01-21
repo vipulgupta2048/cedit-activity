@@ -22,6 +22,7 @@ import os
 import sys
 import time
 import datetime
+import globals as G
 
 from gettext import gettext as _
 
@@ -556,6 +557,11 @@ class CEdit(activity.Activity):
         widget.set_label(label)
 
         color = '#FF0000' if changed else '#FFFFFF'
+        if view.get_file():
+            readable, writable = G.get_path_access(view.get_file())
+            color = '#4A90D9' if not writable else color
+            widget.set_tooltip_text(_('You do not have sufficient permissions to write this file'))
+
         widget.modify_fg(Gtk.StateType.NORMAL, Gdk.color_parse(color))
         self.update_buttons()
 
