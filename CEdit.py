@@ -321,7 +321,7 @@ class CEdit(activity.Activity):
     def update_buttons(self, notebook=None, scrolled=None, *args):
         if not isinstance(scrolled, Gtk.ScrolledWindow):
             view = self.get_view()
-        
+
         else:
             view = scrolled.get_children()[0]
 
@@ -667,7 +667,7 @@ class CEdit(activity.Activity):
 
         def _alert_response(alert, response, scrolled):
             self.vbox.remove(alert)
-            
+
             if response == Gtk.ResponseType.YES:
                 view = scrolled.get_children()[0]
 

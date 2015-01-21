@@ -41,6 +41,9 @@ IMAGES = {'user-home': HOME,
           'text-x-python': PYTHON,
           'application-x-python-bytecode': PYTHON,
           'application-x-executable': EXECUTABLE,
+          'application-x-shellscript': EXECUTABLE,
+          'application-x-m4': EXECUTABLE,
+          'text-x-script': EXECUTABLE,
           'package-x-generic': COMPRESSED,
           'inode-symlink': FOLDER_LINK,
           'application-pdf': PDF}
@@ -72,6 +75,8 @@ def get_pixbuf_from_path(path, size=62):
             'standard::icon', Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, None)
         icon = info.get_icon()
         types = icon.get_names()
+
+        print path, types
 
         if os.path.ismount(path):
             return GdkPixbuf.Pixbuf.new_from_file_at_size(MOUNT, size, size)
