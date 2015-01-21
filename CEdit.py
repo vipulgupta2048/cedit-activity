@@ -272,8 +272,8 @@ class CEdit(activity.Activity):
         toolbar_edit.show_all()
         toolbar_view.show_all()
 
-        toolbar_edit.copy.hide()
-        toolbar_edit.paste.hide()
+        toolbar_edit.copy.destroy()
+        toolbar_edit.paste.destroy()
 
         self.set_toolbar_box(toolbar_box)
 
