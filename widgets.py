@@ -134,6 +134,13 @@ class FileChooserOpen(Gtk.Window):
     def __key_release_event_cb(self, widget, event):
         if event.keyval == 65293:  # Enter
             self.__open_path()
+            self.close()
+
+        elif event.keyval == 65288:  # BackSpace
+            self.go_up()
+
+        elif event.keyval == 65307:  # Scape
+            self.close()
 
     def go_up(self, button=None, _return=False):
         path = '/'
@@ -337,6 +344,7 @@ class FileChooserSave(Gtk.Window):
         self.view.set_text_column(0)
         self.view.set_pixbuf_column(1)
 
+        self.connect('key-release-event', self.__key_release_event_cb)
         self.view.connect('selection-changed', self.__selection_changed)
         self.view.connect('button-press-event', self.__button_press_event_cb)
 
@@ -398,6 +406,17 @@ class FileChooserSave(Gtk.Window):
         self.toolbar.insert(self.close_button, -1)
 
         self.vbox.pack_start(self.toolbar, False, False, 0)
+
+    def __key_release_event_cb(self, widget, event):
+        if event.keyval == 65293:  # Enter
+            if self.area.get_selected_items():
+                self.__name_selected()
+
+        elif event.keyval == 65288:  # BackSpace
+            self.go_up()
+
+        elif event.keyval == 65307:  # Scape
+            self.close()
 
     def go_up(self, button=None, _return=False):
         path = '/'
