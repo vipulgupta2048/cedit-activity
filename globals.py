@@ -1,12 +1,28 @@
 #!/usr/bin/env python
 
 import os
+from gettext import gettext as _
 from ConfigParser import ConfigParser
 
 from gi.repository import Gio
 from gi.repository import Gtk
 from gi.repository import GdkPixbuf
 from gi.repository import GtkSource
+
+TEXT_FILE_NOT_SAVED = _('This file has not saved.')
+TEXT_MUST_SAVE = _('You must save this file to print.')
+TEXT_SAVE_FILE = _('Save changes to document **** before closing?')
+TEXT_IF_NOT_SAVE = _('If you do not save, changes will be lost forever.')
+TEXT_HAVE_NOT_PERMISSIONS = _(
+    'You do not have sufficient permissions to write this file')
+TEXT_SAVE_CHANGES_QUESTION = _('Save changes to document **** before closing?')
+TEXT_LOST_FOREVER = _('If you do not save, changes will be lost forever.')
+TEXT_FILE_NOT_EXISTS1 = _('This file not exists.')
+TEXT_FILE_NOT_EXISTS2 = _(
+    "Apparently you've selected a file that does not exist.")
+TEXT_ERROR_CREATING_FOLDER = _('Error creating the folder.')
+TEXT_FILE_ALREADY_EXISTS = _('This file is already exists.')
+TEXT_OVERWRITE_QUESTION = _('**** already exists, Overwrite it?')
 
 ICONS = os.path.join(os.path.dirname(__file__), 'icons/')
 

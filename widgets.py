@@ -214,9 +214,8 @@ class FileChooserOpen(Gtk.Window):
 
     def create_alert(self, path):
         alert = TimeoutAlert(10)
-        alert.props.title = _('This file not exists.')
-        alert.props.msg = _(
-            "Apparently you've selected a file that does not exist.")
+        alert.props.title = G.TEXT_FILE_NOT_EXISTS1
+        alert.props.msg = G.TEXT_FILE_NOT_EXISTS2
         image = Gtk.Image.new_from_stock(Gtk.STOCK_OK, Gtk.IconSize.MENU)
 
         hbox = alert.get_children()[0]
@@ -458,7 +457,7 @@ class FileChooserSave(Gtk.Window):
 
             except OSError as msg:
                 alert = Alert()
-                alert.props.title = _('Error creating the folder.')
+                alert.props.title = G.TEXT_ERROR_CREATING_FOLDER
                 alert.props.msg = msg
                 image = Gtk.Image.new_from_stock(
                     Gtk.STOCK_OK, Gtk.IconSize.MENU)
@@ -498,8 +497,8 @@ class FileChooserSave(Gtk.Window):
 
     def create_alert(self, path):
         alert = Alert()
-        alert.props.title = _('This file is already exists.')
-        alert.props.msg = _('%s already exists, Overwrite it?' % path)
+        alert.props.title = G.TEXT_ALREADY_EXISTS
+        alert.props.msg = G.TEXT_OVERWRITE_QUESTION.replace('****', path)
         cancel = Gtk.Image.new_from_icon_name(
             'dialog-cancel', Gtk.IconSize.MENU)
         save = Gtk.Image.new_from_icon_name('filesave', Gtk.IconSize.MENU)

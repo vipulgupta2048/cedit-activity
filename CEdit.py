@@ -428,8 +428,8 @@ class CEdit(activity.Activity):
 
         if not path:
             alert = TimeoutAlert(10)
-            alert.props.title = _('This file has not saved.')
-            alert.props.msg = _('You must save this file to print.')
+            alert.props.title = G.TEXT_FILE_NOT_SAVED
+            alert.props.msg = G.TEXT_MUST_SAVE
             hbox = alert.get_children()[0]
             buttonbox = hbox.get_children()[1]
             button = buttonbox.get_children()[0]
@@ -518,8 +518,8 @@ class CEdit(activity.Activity):
 
         else:
             name = view.get_file_name()
-            title = _('Save changes to document "%s" before closing?' % name)
-            msg = _('If you do not save, changes will be lost forever.')
+            title = G.TEXT_SAVE_FILE.replace('****', name)
+            msg = G.TEXT_IF_NOT_SAVE
             cancel = Gtk.Image.new_from_icon_name(
                 'dialog-cancel', Gtk.IconSize.MENU)
             no = Gtk.Image.new_from_icon_name(
@@ -560,7 +560,7 @@ class CEdit(activity.Activity):
         if view.get_file():
             readable, writable = G.get_path_access(view.get_file())
             color = '#4A90D9' if not writable else color
-            widget.set_tooltip_text(_('You do not have sufficient permissions to write this file'))
+            widget.set_tooltip_text(G.TEXT_HAVE_NOT_PERMISSIONS)
 
         widget.modify_fg(Gtk.StateType.NORMAL, Gdk.color_parse(color))
         self.update_buttons()
@@ -693,9 +693,8 @@ class CEdit(activity.Activity):
                 check_modified()
 
         def _create_alert(name, scrolled):
-            title = _(
-                'Save changes to document "%s" before closing?' % name)
-            msg = _('If you do not save, changes will be lost forever.')
+            title = G.TEXT_SAVE_CHANGES_QUESTION.replace('****', name)
+            msg = G.TEXT_LOST_FOREVER
 
             no = Gtk.Image.new_from_icon_name(
                 'activity-stop', Gtk.IconSize.MENU)
