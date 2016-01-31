@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
 #   CEdit.py por:
 #   Cristian García <cristian99garcia@gmail.com>
 #
@@ -20,11 +20,10 @@
 
 import os
 import sys
-import time
-import datetime
-import globals as G
-
 from gettext import gettext as _
+
+import utils
+import globals as G
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -32,26 +31,15 @@ from gi.repository import Pango
 from gi.repository import GObject
 from gi.repository import GtkSource
 
-from widgets import View
-from widgets import Spinner
-from widgets import InfoBar
-from widgets import FontSize
-from widgets import ComboStyles
-from widgets import FontComboBox
-from widgets import FileChooserOpen
-from widgets import FileChooserSave
+from view import View
+from infobar import InfoBar
+from filechooser import FileChooserOpen
+from filechooser import FileChooserSave
+from toolbars import ToolbarBox
 
 from sugar3.activity import activity
 from sugar3.graphics.alert import Alert
 from sugar3.graphics.alert import TimeoutAlert
-from sugar3.graphics.iconentry import IconEntry
-from sugar3.graphics.toolbutton import ToolButton
-from sugar3.graphics.toolbarbox import ToolbarBox
-from sugar3.graphics.toolbarbox import ToolbarButton
-from sugar3.graphics.radiotoolbutton import RadioToolButton
-from sugar3.graphics.toggletoolbutton import ToggleToolButton
-from sugar3.activity.widgets import EditToolbar
-from sugar3.activity.widgets import _create_activity_icon as ActivityIcon
 
 
 class CEdit(activity.Activity):
@@ -65,7 +53,22 @@ class CEdit(activity.Activity):
         self.vbox = Gtk.VBox()
         self.infobar = InfoBar()
 
-        self.make_toolbar()
+        self.toolbar_box = ToolbarBox(self)
+        self.toolbar_box.connect("new-page", lambda toolbar: self.new_page())
+        self.toolbar_box.connect("chooser-open", self.file_chooser_open)
+        self.toolbar_box.connect("chooser-save", self.file_chooser_save)
+        self.toolbar_box.connect("print-file", self.print_file)
+        self.toolbar_box.connect("undo", self.undo)
+        self.toolbar_box.connect("redo", self.redo)
+        self.toolbar_box.connect("search-text", self.search_text)
+        self.toolbar_box.connect("replace-text", self.replace_text)
+        self.toolbar_box.connect("font-size-changed", self.font_size_changed)
+        self.toolbar_box.connect("font-family-changed", self.font_family_changed)
+        self.toolbar_box.connect("show-line-numbres-changed", self.show_line_numbers_changed)
+        self.toolbar_box.connect("show-right-line-changed", self.show_right_line_changed)
+        self.toolbar_box.connect("right-line-pos-changed", self.right_line_pos_changed)
+        self.set_toolbar_box(self.toolbar_box)
+
         self.make_notebook()
 
         self.infobar.connect('language-changed', self.set_language)
@@ -79,204 +82,24 @@ class CEdit(activity.Activity):
             self.conf = {}
             self.conf['font'] = str(self.metadata['font'])
             self.conf['font-size'] = int(self.metadata['font-size'])
-            self.conf['show-line-numbers'] = bool(
-                int(self.metadata['show-line-numbers']))
+            self.conf['show-line-numbers'] = bool(int(self.metadata['show-line-numbers']))
             self.conf['tab-width'] = int(self.metadata['tab-width'])
             self.conf['use-spaces'] = bool(int(self.metadata['use-spaces']))
             self.conf['theme'] = str(self.metadata['theme'])
             self.conf['right-line-pos'] = int(self.metadata['right-line-pos'])
-            self.conf['show-right-line'] = bool(
-                int(self.metadata['show-right-line']))
-            self.conf['wrap-mode'] = str(self.metadata['wrap-mode'])
+            self.conf['show-right-line'] = bool(int(self.metadata['show-right-line']))
 
         else:
-            self.conf = {'font': 'Monospace',
-                         'font-size': 14,
-                         'show-line-numbers': True,
-                         'tab-width': 4,
-                         'use-spaces': True,
-                         'theme': 'classic',
-                         'right-line-pos': 80,
-                         'show-right-line': False,
-                         'wrap-mode': 'none'}
-
-    def make_toolbar(self):
-        def make_separator(toolbar, expand=True):
-            separator = Gtk.SeparatorToolItem()
-            separator.props.draw = not expand
-            separator.set_expand(expand)
-            toolbar.insert(separator, -1)
-
-        toolbar_box = ToolbarBox()
-        toolbar = toolbar_box.toolbar
-
-        activity_button = ToolButton()
-        activity_button.set_icon_widget(ActivityIcon(None))
-        toolbar.insert(activity_button, -1)
-
-        toolbar.insert(Gtk.SeparatorToolItem(), -1)
-
-        toolbar_file = Gtk.Toolbar()
-        boton_toolbar_file = ToolbarButton(page=toolbar_file, icon_name='txt')
-        toolbar.add(boton_toolbar_file)
-
-        toolbar_edit = EditToolbar()
-        button_toolbar_edit = ToolbarButton(
-            page=toolbar_edit, icon_name='toolbar-edit')
-        toolbar.insert(button_toolbar_edit, -1)
-
-        toolbar_view = Gtk.Toolbar()
-        boton_toolbar_view = ToolbarButton(
-            page=toolbar_view, icon_name='toolbar-view')
-        toolbar.insert(boton_toolbar_view, -1)
-
-        self.button_undo = toolbar_edit.undo
-        self.button_undo.props.accelerator = '<Ctrl>Z'
-        self.button_undo.set_sensitive(False)
-        toolbar_edit.undo.connect('clicked', self.undo)
-
-        self.button_redo = toolbar_edit.redo
-        self.button_redo.props.accelerator = '<Ctrl><Mayus>Z'
-        self.button_redo.set_sensitive(False)
-        self.button_redo.connect('clicked', self.redo)
-
-        self.entry_search = IconEntry()
-        item_entry = Gtk.ToolItem()
-        self.entry_search.set_size_request(250, -1)
-        self.entry_search.set_placeholder_text('Search...')
-        self.entry_search.set_icon_from_name(
-            Gtk.EntryIconPosition.SECONDARY, 'search')
-        self.entry_search.connect('changed', self.search_text)
-        self.entry_search.connect('activate', self.search_text, True)
-        item_entry.add(self.entry_search)
-        toolbar_edit.insert(item_entry, -1)
-
-        self.entry_replace = IconEntry()
-        item_entry = Gtk.ToolItem()
-        self.entry_replace.set_size_request(250, -1)
-        self.entry_replace.set_placeholder_text('Replace...')
-        self.entry_replace.connect('activate', self.replace_text)
-        item_entry.add(self.entry_replace)
-        toolbar_edit.insert(item_entry, -1)
-
-        button_new = ToolButton('new-file')
-        button_new.props.accelerator = '<Ctrl>N'
-        button_new.connect('clicked', lambda w: self.new_page())
-        button_new.set_tooltip(_('New file'))
-        toolbar_file.insert(button_new, -1)
-
-        button_open = ToolButton('fileopen')
-        button_open.props.accelerator = '<Ctrl>O'
-        button_open.set_tooltip(_('Open file from file system'))
-        button_open.connect('clicked', self.file_chooser_open)
-        toolbar_file.insert(button_open, -1)
-
-        self.button_save = ToolButton('filesave')
-        self.button_save.props.accelerator = '<Ctrl>S'
-        self.button_save.set_tooltip(_('Save file to the file system'))
-        self.button_save.connect('clicked', self.file_chooser_save)
-        toolbar_file.insert(self.button_save, -1)
-
-        button_save_as = ToolButton('save-as')
-        button_save_as.props.accelerator = '<Ctrl><Mayus>S'
-        button_save_as.set_tooltip(_('Save as file to the file system'))
-        button_save_as.connect('clicked', self.file_chooser_save, True)
-        toolbar_file.insert(button_save_as, -1)
-
-        make_separator(toolbar_file, False)
-
-        button_print = ToolButton('printer')
-        button_print.props.accelerator = '<Ctrl>I'
-        button_print.set_tooltip(_('Print file'))
-        button_print.connect('clicked', self.print_file)
-        toolbar_file.insert(button_print, -1)
-
-        make_separator(toolbar_edit, False)
-
-        button_clock = ToolButton('clock')
-        button_clock.props.accelerator = '<Ctrl>T'
-        button_clock.set_tooltip(_('Insert date and time'))
-        button_clock.connect('clicked', self.insert_date_and_time)
-        toolbar_edit.insert(button_clock, -1)
-
-        button_wrap_none = Gtk.RadioToolButton()
-        button_wrap_none.set_icon_name('wrap-none')
-        button_wrap_none.connect("toggled", self.wrap_mode_changed, 'none')
-        toolbar_view.insert(button_wrap_none, -1)
-
-        button_wrap_char = Gtk.RadioToolButton.new_from_widget(button_wrap_none)
-        button_wrap_char.set_icon_name('format-justify-fill')
-        button_wrap_char.connect("toggled", self.wrap_mode_changed, 'char')
-        toolbar_view.insert(button_wrap_char, -1)
-
-        button_wrap_word = Gtk.RadioToolButton.new_from_widget(button_wrap_none)
-        button_wrap_word.set_icon_name('format-justify-left')
-        button_wrap_word.connect("toggled", self.wrap_mode_changed, 'word')
-        toolbar_view.insert(button_wrap_word, -1)
-
-        if self.conf['wrap-mode'] == 'none':
-            button_wrap_none.set_active(True)
-
-        elif self.conf['wrap-mode'] == 'char':
-            button_wrap_none.set_active(True)
-
-        elif self.conf['wrap-mode'] == 'word':
-            button_wrap_none.set_active(True)
-
-        make_separator(toolbar_view, False)
-
-        item_font_size = FontSize()
-        item_font_size.set_font_size(self.conf['font-size'])
-        item_font_size.connect('changed', self.font_size_changed)
-        toolbar_view.insert(item_font_size, -1)
-
-        combo_font = FontComboBox(self.conf['font'])
-        combo_font.connect('changed', self.font_changed)
-        toolbar_view.insert(combo_font, -1)
-
-        make_separator(toolbar_view, False)
-
-        button_numbers = ToggleToolButton('show-numbers')
-        button_numbers.props.accelerator = '<Ctrl><Mayus>N'
-        button_numbers.set_tooltip(_('Show line numbers'))
-        button_numbers.set_active(self.conf['show-line-numbers'])
-        button_numbers.connect('toggled', self.show_numbers_changed)
-        toolbar_view.insert(button_numbers, -1)
-
-        button_right_line = ToggleToolButton('show-right-line')
-        button_right_line.props.accelerator = '<Ctrl>L'
-        button_right_line.set_tooltip(_('Show a line in a specific position'))
-        button_right_line.set_active(self.conf['show-right-line'])
-        button_right_line.connect('toggled', self.show_right_line_changed)
-        toolbar_view.insert(button_right_line, -1)
-
-        self.spinner_right_line = Spinner(self.conf['right-line-pos'], 1, 150)
-        self.spinner_right_line.set_sensitive(self.conf['show-right-line'])
-        self.spinner_right_line.connect(
-            'value-changed', self.right_line_pos_changed)
-        toolbar_view.insert(self.spinner_right_line, -1)
-
-        make_separator(toolbar_view, False)
-
-        combo_styles = ComboStyles(self.conf['theme'])
-        combo_styles.connect('theme-changed', self.theme_changed)
-        toolbar_view.insert(combo_styles, -1)
-
-        make_separator(toolbar, True)
-
-        button_stop = ToolButton('activity-stop')
-        button_stop.props.accelerator = '<Ctrl>Q'
-        button_stop.connect('clicked', self._exit)
-        toolbar.insert(button_stop, -1)
-
-        toolbar_file.show_all()
-        toolbar_edit.show_all()
-        toolbar_view.show_all()
-
-        toolbar_edit.copy.destroy()
-        toolbar_edit.paste.destroy()
-
-        self.set_toolbar_box(toolbar_box)
+            self.conf = {
+                'font': 'Monospace',
+                'font-size': 14,
+                'show-line-numbers': True,
+                'tab-width': 4,
+                'use-spaces': True,
+                'theme': 'classic',
+                'right-line-pos': 80,
+                'show-right-line': False,
+            }
 
     def make_notebook(self):
         self.notebook = Gtk.Notebook()
@@ -328,12 +151,12 @@ class CEdit(activity.Activity):
 
         buffer = view.get_buffer()
 
-        self.button_undo.set_sensitive(buffer.can_undo())
-        self.button_redo.set_sensitive(buffer.can_redo())
-        self.button_save.set_sensitive(buffer.get_modified())
-        self.entry_search.set_sensitive(bool(buffer.get_all_text()))
-        self.entry_replace.set_sensitive(bool(buffer.get_all_text()))
-        self.spinner_right_line.set_sensitive(self.conf['show-right-line'])
+        self.toolbar_box.button_undo.set_sensitive(buffer.can_undo())
+        self.toolbar_box.button_redo.set_sensitive(buffer.can_redo())
+        self.toolbar_box.button_save.set_sensitive(buffer.get_modified())
+        self.toolbar_box.entry_search.set_sensitive(bool(buffer.get_all_text()))
+        self.toolbar_box.entry_replace.set_sensitive(bool(buffer.get_all_text()))
+        self.toolbar_box.spinner_right_line.set_sensitive(self.conf['show-right-line'])
         self.infobar.set_language(buffer.get_language_str())
         self.update_cursor_position(buffer)
 
@@ -443,7 +266,6 @@ class CEdit(activity.Activity):
             return
 
         compositor = GtkSource.PrintCompositor.new_from_view(view)
-        compositor.set_wrap_mode(view.get_wrap_mode())
         compositor.set_highlight_syntax(buffer.get_highlight_syntax())
         compositor.set_print_line_numbers(self.conf['show-line-numbers'])
 
@@ -558,7 +380,7 @@ class CEdit(activity.Activity):
 
         color = '#FF0000' if changed else '#FFFFFF'
         if view.get_file():
-            readable, writable = G.get_path_access(view.get_file())
+            readable, writable = utils.get_path_access(view.get_file())
             color = '#4A90D9' if not writable else color
             widget.set_tooltip_text(G.TEXT_HAVE_NOT_PERMISSIONS)
 
@@ -580,33 +402,29 @@ class CEdit(activity.Activity):
         self.get_view().redo()
         self.change_title_from_view()
 
-    def search_text(self, entry, enter=False):
-        text = entry.get_text()
+    def search_text(self, toolbarbox, enter=False):
+        text = self.toolbar_box.entry_search.get_text()
         self.get_view().search(text, enter)
 
-    def replace_text(self, entry):
-        text_search = self.entry_search.get_text()
-        text_replace = entry.get_text()
+    def replace_text(self, widget):
+        text_search = self.toolbar_box.entry_search.get_text()
+        text_replace = self.toolbar_box.entry_replace.get_text()
         self.get_view().replace(text_search, text_replace)
-
-    def wrap_mode_changed(self, widget, mode):
-        self.conf['wrap-mode'] = mode
-        self.set_conf_to_views()
 
     def font_size_changed(self, widget, font_size):
         self.conf['font-size'] = font_size
         self.set_conf_to_views()
 
-    def font_changed(self, widget, font):
+    def font_family_changed(self, widget, font):
         self.conf['font'] = font
         self.set_conf_to_views()
 
-    def show_numbers_changed(self, widget):
+    def show_line_numbers_changed(self, widget):
         self.conf['show-line-numbers'] = widget.get_active()
         self.set_conf_to_views()
 
-    def show_right_line_changed(self, widget):
-        self.conf['show-right-line'] = widget.get_active()
+    def show_right_line_changed(self, widget, show):
+        self.conf['show-right-line'] = show
         self.update_buttons()
         self.set_conf_to_views()
 
@@ -626,15 +444,6 @@ class CEdit(activity.Activity):
         for scrolled in self.notebook.get_children():
             view = scrolled.get_children()[0]
             view.set_conf(self.conf)
-
-    def insert_date_and_time(self, widget):
-        view = self.get_view()
-        day = datetime.date.today()
-        date = day.strftime('%d/%m/%y')
-        hour = time.strftime('%H:%M:%S')
-        text = date + ' ' + hour
-
-        view.buffer.insert_interactive_at_cursor(text, -1, True)
 
     def _alert_response(self, widget, response, scrolled):
         if response == Gtk.ResponseType.NO:
@@ -661,7 +470,6 @@ class CEdit(activity.Activity):
         self.metadata['theme'] = self.conf['theme']
         self.metadata['right-line-pos'] = self.conf['right-line-pos']
         self.metadata['show-right-line'] = self.conf['show-right-line']
-        self.metadata['wrap-mode'] = self.conf['wrap-mode']
 
     def _exit(self, *args):
         def _remove_page(widget, scrolled):
@@ -739,3 +547,4 @@ class CEdit(activity.Activity):
 
         self.reopen = False
         check_modified()
+
