@@ -27,10 +27,10 @@ from gi.repository import GObject
 class ComboStyles(Gtk.ToolItem):
 
     __gsignals__ = {
-        'theme-changed': (GObject.SIGNAL_RUN_FIRST, None, [str])
+        "theme-changed": (GObject.SIGNAL_RUN_FIRST, None, [str])
     }
 
-    def __init__(self, selected_style='classic'):
+    def __init__(self, selected_style="classic"):
         Gtk.ToolItem.__init__(self)
 
         self.style_manager = G.STYLE_MANAGER
@@ -41,11 +41,11 @@ class ComboStyles(Gtk.ToolItem):
             self.combo.append_text(style)
 
         self.combo.set_active(self.styles.index(selected_style))
-        self.combo.connect('changed', self.__theme_changed)
+        self.combo.connect("changed", self.__theme_changed)
 
         self.add(self.combo)
         self.show_all()
 
     def __theme_changed(self, widget):
-        self.emit('theme-changed', self.styles[self.combo.get_active()])
+        self.emit("theme-changed", self.styles[self.combo.get_active()])
 

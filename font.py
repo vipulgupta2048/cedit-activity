@@ -37,7 +37,7 @@ from sugar3.graphics.palettemenu import PaletteMenuItem
 
 class FontLabel(Gtk.Label):
 
-    def __init__(self, default_font='Monospace'):
+    def __init__(self, default_font="Monospace"):
         Gtk.Label.__init__(self)
 
         self._font = None
@@ -51,7 +51,7 @@ class FontLabel(Gtk.Label):
 class FontComboBox(Gtk.ToolItem):
 
     __gsignals__ = {
-        'changed': (GObject.SignalFlags.RUN_LAST, None, [str]),
+        "changed": (GObject.SignalFlags.RUN_LAST, None, [str]),
     }
 
     def __init__(self, font_name):
@@ -61,12 +61,12 @@ class FontComboBox(Gtk.ToolItem):
         self._font_label = FontLabel(font_name)
         self._font_name = font_name
 
-        bt = Gtk.Button('')
+        bt = Gtk.Button("")
         bt.set_can_focus(False)
         bt.remove(bt.get_children()[0])
 
         box = Gtk.HBox()
-        icon = Icon(icon_name='font-text')
+        icon = Icon(icon_name="font-text")
         box.pack_start(icon, False, False, 10)
         box.pack_start(self._font_label, False, False, 10)
         bt.add(box)
@@ -91,7 +91,7 @@ class FontComboBox(Gtk.ToolItem):
         self._palette_invoker.attach_tool(self)
         self._palette_invoker.props.toggle_palette = True
 
-        self.palette = Palette(_('Select font'))
+        self.palette = Palette(_("Select font"))
         self.palette.set_invoker(self._palette_invoker)
 
         self._menu_box = PaletteMenuBox()
@@ -129,7 +129,7 @@ class FontComboBox(Gtk.ToolItem):
             gio_fonts_file = Gio.File.new_for_path(G.USER_FONTS_FILE_PATH)
             self.monitor = gio_fonts_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
             self.monitor.set_rate_limit(5000)
-            self.monitor.connect('changed', self._reload_fonts)
+            self.monitor.connect("changed", self._reload_fonts)
 
     def _reload_fonts(self, monitor, gio_file, other_file, event):
         if event != Gio.FileMonitorEvent.CHANGES_DONE_HINT:
@@ -162,13 +162,13 @@ class FontComboBox(Gtk.ToolItem):
     def __font_selected_cb(self, menu, font_name):
         self._font_name = font_name
         self._font_label.set_font(font_name)
-        self.emit('changed', self._font_name)
+        self.emit("changed", self._font_name)
 
     def _add_menu(self, font_name, activate_cb):
         label = '<span font="%s">%s</span>' % (font_name, font_name)
         menu_item = PaletteMenuItem()
         menu_item.set_label(label)
-        menu_item.connect('activate', activate_cb, font_name)
+        menu_item.connect("activate", activate_cb, font_name)
         self._menu_box.append_item(menu_item)
         menu_item.show()
 
@@ -206,7 +206,7 @@ class FontComboBox(Gtk.ToolItem):
 class FontSize(Gtk.ToolItem):
 
     __gsignals__ = {
-        'changed': (GObject.SignalFlags.RUN_LAST, None, [int]),
+        "changed": (GObject.SignalFlags.RUN_LAST, None, [int]),
     }
 
     def __init__(self):
@@ -231,8 +231,8 @@ class FontSize(Gtk.ToolItem):
 
         self._size_down = Gtk.Button()
         self._size_down.set_can_focus(False)
-        self._size_down.set_image(Icon(icon_name='resize-'))
-        self._size_down.connect('clicked', self.__font_sizes_cb, False)
+        self._size_down.set_image(Icon(icon_name="resize-"))
+        self._size_down.connect("clicked", self.__font_sizes_cb, False)
         hbox.pack_start(self._size_down, False, False, 5)
 
         self._default_size = 14
@@ -243,8 +243,8 @@ class FontSize(Gtk.ToolItem):
 
         self._size_up = Gtk.Button()
         self._size_up.set_can_focus(False)
-        self._size_up.set_image(Icon(icon_name='resize+'))
-        self._size_up.connect('clicked', self.__font_sizes_cb, True)
+        self._size_up.set_image(Icon(icon_name="resize+"))
+        self._size_up.connect("clicked", self.__font_sizes_cb, True)
         hbox.pack_start(self._size_up, False, False, 5)
 
         radius = 2 * subcell_size
@@ -281,7 +281,7 @@ class FontSize(Gtk.ToolItem):
         self._size_label.set_text(str(self._font_size))
         self._size_down.set_sensitive(i != 0)
         self._size_up.set_sensitive(i < len(self._font_sizes) - 1)
-        self.emit('changed', self._font_size)
+        self.emit("changed", self._font_size)
 
     def set_font_size(self, size):
         if size not in self._font_sizes:
@@ -299,7 +299,7 @@ class FontSize(Gtk.ToolItem):
         i = self._font_sizes.index(self._font_size)
         self._size_down.set_sensitive(i != 0)
         self._size_up.set_sensitive(i < len(self._font_sizes) - 1)
-        self.emit('changed', self._font_size)
+        self.emit("changed", self._font_size)
 
     def get_font_size(self):
         return self._font_size

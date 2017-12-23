@@ -44,47 +44,47 @@ from sugar3.activity.widgets import EditToolbar as SugarEditToolbar
 class FileToolbar(Gtk.Toolbar):
 
     __gsignals__ = {
-        "new-page": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "chooser-open": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "chooser-save": (GObject.SIGNAL_RUN_FIRST, None, [bool]),  # bool: force chooser
-        "print-file": (GObject.SIGNAL_RUN_FIRST, None, []),
+        "new-page": (GObject.SIGNAL_RUN_LAST, None, []),
+        "chooser-open": (GObject.SIGNAL_RUN_LAST, None, []),
+        "chooser-save": (GObject.SIGNAL_RUN_LAST, None, [bool]),  # bool: force chooser
+        "print-file": (GObject.SIGNAL_RUN_LAST, None, []),
     }
 
     def __init__(self):
         Gtk.Toolbar.__init__(self)
 
-        self.button = ToolbarButton(page=self, icon_name='txt')
+        self.button = ToolbarButton(page=self, icon_name="txt")
 
-        button_new = ToolButton('new-file')
-        button_new.props.accelerator = '<Ctrl>N'
-        button_new.connect('clicked', lambda button: self.emit("new-page"))
-        button_new.set_tooltip(_('New file'))
+        button_new = ToolButton("new-file")
+        button_new.props.accelerator = "<Ctrl>N"
+        button_new.connect("clicked", lambda button: self.emit("new-page"))
+        button_new.set_tooltip(_("New file"))
         self.insert(button_new, -1)
 
-        button_open = ToolButton('fileopen')
-        button_open.props.accelerator = '<Ctrl>O'
-        button_open.set_tooltip(_('Open file from file system'))
-        button_open.connect('clicked', lambda button: self.emit("chooser-open"))
+        button_open = ToolButton("fileopen")
+        button_open.props.accelerator = "<Ctrl>O"
+        button_open.set_tooltip(_("Open file from file system"))
+        button_open.connect("clicked", lambda button: self.emit("chooser-open"))
         self.insert(button_open, -1)
 
-        self.button_save = ToolButton('filesave')
-        self.button_save.props.accelerator = '<Ctrl>S'
-        self.button_save.set_tooltip(_('Save file to the file system'))
-        self.button_save.connect('clicked', lambda button: self.emit("chooser-save", False))
+        self.button_save = ToolButton("filesave")
+        self.button_save.props.accelerator = "<Ctrl>S"
+        self.button_save.set_tooltip(_("Save file to the file system"))
+        self.button_save.connect("clicked", lambda button: self.emit("chooser-save", False))
         self.insert(self.button_save, -1)
 
-        button_save_as = ToolButton('save-as')
-        button_save_as.props.accelerator = '<Ctrl><Mayus>S'
-        button_save_as.set_tooltip(_('Save as file to the file system'))
-        button_save_as.connect('clicked', lambda button: self.emit("chooser-save", True))
+        button_save_as = ToolButton("save-as")
+        button_save_as.props.accelerator = "<Ctrl><Mayus>S"
+        button_save_as.set_tooltip(_("Save as file to the file system"))
+        button_save_as.connect("clicked", lambda button: self.emit("chooser-save", True))
         self.insert(button_save_as, -1)
 
         self.insert(utils.make_separator(False), -1)
 
-        button_print = ToolButton('printer')
-        button_print.props.accelerator = '<Ctrl>I'
-        button_print.set_tooltip(_('Print file'))
-        button_print.connect('clicked', lambda widget: self.emit("print-file"))
+        button_print = ToolButton("printer")
+        button_print.props.accelerator = "<Ctrl>I"
+        button_print.set_tooltip(_("Print file"))
+        button_print.connect("clicked", lambda widget: self.emit("print-file"))
         self.insert(button_print, -1)
 
         self.show_all()
@@ -93,35 +93,35 @@ class FileToolbar(Gtk.Toolbar):
 class EditToolbar(SugarEditToolbar):
 
     __gsignals__ = {
-        "undo": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "redo": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "search-text": (GObject.SIGNAL_RUN_FIRST, None, [bool]),
-        "replace-text": (GObject.SIGNAL_RUN_FIRST, None, [])
+        "undo": (GObject.SIGNAL_RUN_LAST, None, []),
+        "redo": (GObject.SIGNAL_RUN_LAST, None, []),
+        "search-text": (GObject.SIGNAL_RUN_LAST, None, [bool]),
+        "replace-text": (GObject.SIGNAL_RUN_LAST, None, [])
     }
 
     def __init__(self):
         SugarEditToolbar.__init__(self)
 
-        self.button = ToolbarButton(page=self, icon_name='toolbar-edit')
+        self.button = ToolbarButton(page=self, icon_name="toolbar-edit")
 
-        self.undo.props.accelerator = '<Ctrl>Z'
+        self.undo.props.accelerator = "<Ctrl>Z"
         self.undo.set_sensitive(False)
-        self.undo.connect('clicked', lambda button: self.emit("undo"))
+        self.undo.connect("clicked", lambda button: self.emit("undo"))
 
-        self.redo.props.accelerator = '<Ctrl><Mayus>Z'
+        self.redo.props.accelerator = "<Ctrl><Mayus>Z"
         self.redo.set_sensitive(False)
-        self.redo.connect('clicked', lambda button: self.emit("redo"))
+        self.redo.connect("clicked", lambda button: self.emit("redo"))
 
         item_entry = Gtk.ToolItem()
         self.insert(item_entry, -1)
 
         self.entry_search = IconEntry()
         self.entry_search.set_size_request(250, -1)
-        self.entry_search.set_placeholder_text('Search...')
+        self.entry_search.set_placeholder_text("Search...")
         self.entry_search.set_margin_right(10)
-        self.entry_search.set_icon_from_name(Gtk.EntryIconPosition.SECONDARY, 'search')
-        self.entry_search.connect('changed', lambda entry: self.emit("search-text", False))
-        self.entry_search.connect('activate', lambda entry: self.emit("search-text", True))
+        self.entry_search.set_icon_from_name(Gtk.EntryIconPosition.SECONDARY, "search")
+        self.entry_search.connect("changed", lambda entry: self.emit("search-text", False))
+        self.entry_search.connect("activate", lambda entry: self.emit("search-text", True))
         item_entry.add(self.entry_search)
 
         item_entry = Gtk.ToolItem()
@@ -129,8 +129,8 @@ class EditToolbar(SugarEditToolbar):
 
         self.entry_replace = IconEntry()
         self.entry_replace.set_size_request(250, -1)
-        self.entry_replace.set_placeholder_text('Replace...')
-        self.entry_replace.connect('activate', lambda entry: self.emit("replace-text"))
+        self.entry_replace.set_placeholder_text("Replace...")
+        self.entry_replace.connect("activate", lambda entry: self.emit("replace-text"))
         item_entry.add(self.entry_replace)
 
         self.copy.destroy()
@@ -142,76 +142,93 @@ class EditToolbar(SugarEditToolbar):
 class ViewToolbar(Gtk.Toolbar):
 
     __gsignals__ = {
-        "font-size-changed": (GObject.SIGNAL_RUN_FIRST, None, [int]),
-        "font-family-changed": (GObject.SIGNAL_RUN_FIRST, None, [str]),
-        "show-line-numbres-changed": (GObject.SIGNAL_RUN_FIRST, None, [bool]),
-        "show-right-line-changed": (GObject.SIGNAL_RUN_FIRST, None, [bool]),
-        "right-line-pos-changed": (GObject.SIGNAL_RUN_FIRST, None, [int]),
+        "font-size-changed": (GObject.SIGNAL_RUN_LAST, None, [int]),
+        "font-family-changed": (GObject.SIGNAL_RUN_LAST, None, [str]),
+        "show-line-numbers-changed": (GObject.SIGNAL_RUN_LAST, None, [bool]),
+        "show-right-line-changed": (GObject.SIGNAL_RUN_LAST, None, [bool]),
+        "right-line-pos-changed": (GObject.SIGNAL_RUN_LAST, None, [int]),
+        "theme-changed": (GObject.SIGNAL_RUN_LAST, None, [str]),
     }
 
-    def __init__(self):
+    def __init__(self, conf):
         Gtk.Toolbar.__init__(self)
 
-        self.button = ToolbarButton(page=self, icon_name='toolbar-view')
+        self.button = ToolbarButton(page=self, icon_name="toolbar-view")
 
         item_font_size = FontSize()
-        #item_font_size.set_font_size(self.conf['font-size'])
-        item_font_size.connect('changed', self._font_size_changed)
+        item_font_size.set_font_size(conf["font-size"])
+        item_font_size.connect("changed", self.__font_size_changed_cb)
         self.insert(item_font_size, -1)
 
-        combo_font = FontComboBox("Monospace") #self.conf['font'])
-        #combo_font.connect('changed', self.font_changed)
+        combo_font = FontComboBox(conf["font"])
+        combo_font.connect("changed", self.__font_changed_cb)
         self.insert(combo_font, -1)
 
         self.insert(utils.make_separator(False), -1)
 
-        button_numbers = ToggleToolButton('show-numbers')
-        button_numbers.props.accelerator = '<Ctrl><Mayus>N'
-        button_numbers.set_tooltip(_('Show line numbers'))
-        #button_numbers.set_active(self.conf['show-line-numbers'])
-        button_numbers.connect('toggled', lambda button: self.emit("show-line-numbers-changed", button.get_active()))
+        button_numbers = ToggleToolButton("show-numbers")
+        button_numbers.props.accelerator = "<Ctrl><Mayus>N"
+        button_numbers.set_tooltip(_("Show line numbers"))
+        button_numbers.set_active(conf["show-line-numbers"])
+        button_numbers.connect("toggled", self.__show_line_numbers_changed_cb)
         self.insert(button_numbers, -1)
 
-        button_right_line = ToggleToolButton('show-right-line')
-        button_right_line.props.accelerator = '<Ctrl>L'
-        button_right_line.set_tooltip(_('Show a line in a specific position'))
-        #button_right_line.set_active(self.conf['show-right-line'])
-        button_right_line.connect('toggled', lambda button: self.emit("show-right-line-changed", button.get_active()))
+        button_right_line = ToggleToolButton("show-right-line")
+        button_right_line.props.accelerator = "<Ctrl>L"
+        button_right_line.set_tooltip(_("Show a line in a specific position"))
+        button_right_line.set_active(conf["show-right-line"])
+        button_right_line.connect("toggled", self.__show_right_line_changed_cb)
         self.insert(button_right_line, -1)
 
-        self.spinner_right_line = Spinner(80, 1, 150)  ##self.conf['right-line-pos'], 1, 150)
-        #self.spinner_right_line.set_sensitive(self.conf['show-right-line'])
-        self.spinner_right_line.connect('value-changed', lambda spinner: self.emit("right-line-pos-changed", spinner.get_value()))
+        self.spinner_right_line = Spinner(conf["right-line-pos"], 1, 150)
+        self.spinner_right_line.set_sensitive(conf["show-right-line"])
+        self.spinner_right_line.connect("value-changed", self.__right_line_pos_changed_cb)
         self.insert(self.spinner_right_line, -1)
 
         self.insert(utils.make_separator(False), -1)
 
-        combo_styles = ComboStyles() #self.conf['theme'])
-        #combo_styles.connect('theme-changed', self.theme_changed)
+        combo_styles = ComboStyles(conf["theme"])
+        combo_styles.connect("theme-changed", self.__theme_changed_cb)
         self.insert(combo_styles, -1)
 
         self.show_all()
 
-    def _font_size_changed(self, item, size):
+    def __font_size_changed_cb(self, item, size):
         self.emit("font-size-changed", size)
+
+    def __font_changed_cb(self, combo, font):
+        self.emit("font-family-changed", font)
+
+    def __show_line_numbers_changed_cb(self, button):
+        self.emit("show-line-numbers-changed", button.get_active())
+
+    def __show_right_line_changed_cb(self, button):
+        self.emit("show-right-line-changed", button.get_active())
+
+    def __right_line_pos_changed_cb(self, spinner, value):
+        self.emit("right-line-pos-changed", value)
+
+    def __theme_changed_cb(self, combo, theme):
+        self.emit("theme-changed", theme)
 
 
 class ToolbarBox(SugarToolbarbox):
 
     __gsignals__ = {
-        "new-page": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "chooser-open": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "chooser-save": (GObject.SIGNAL_RUN_FIRST, None, [bool]),  # bool: force chooser
-        "print-file": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "undo": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "redo": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "search-text": (GObject.SIGNAL_RUN_FIRST, None, [bool]),
-        "replace-text": (GObject.SIGNAL_RUN_FIRST, None, []),
-        "font-size-changed": (GObject.SIGNAL_RUN_FIRST, None, [int]),
-        "font-family-changed": (GObject.SIGNAL_RUN_FIRST, None, [str]),
-        "show-line-numbres-changed": (GObject.SIGNAL_RUN_FIRST, None, [bool]),
-        "show-right-line-changed": (GObject.SIGNAL_RUN_FIRST, None, [bool]),
-        "right-line-pos-changed": (GObject.SIGNAL_RUN_FIRST, None, [int]),
+        "new-page": (GObject.SIGNAL_RUN_LAST, None, []),
+        "chooser-open": (GObject.SIGNAL_RUN_LAST, None, []),
+        "chooser-save": (GObject.SIGNAL_RUN_LAST, None, [bool]),  # bool: force chooser
+        "print-file": (GObject.SIGNAL_RUN_LAST, None, []),
+        "undo": (GObject.SIGNAL_RUN_LAST, None, []),
+        "redo": (GObject.SIGNAL_RUN_LAST, None, []),
+        "search-text": (GObject.SIGNAL_RUN_LAST, None, [bool]),
+        "replace-text": (GObject.SIGNAL_RUN_LAST, None, []),
+        "font-size-changed": (GObject.SIGNAL_RUN_LAST, None, [int]),
+        "font-family-changed": (GObject.SIGNAL_RUN_LAST, None, [str]),
+        "show-line-numbers-changed": (GObject.SIGNAL_RUN_LAST, None, [bool]),
+        "show-right-line-changed": (GObject.SIGNAL_RUN_LAST, None, [bool]),
+        "right-line-pos-changed": (GObject.SIGNAL_RUN_LAST, None, [int]),
+        "theme-changed": (GObject.SIGNAL_RUN_LAST, None, [str]),
     }
 
     def __init__(self, activity):
@@ -236,18 +253,19 @@ class ToolbarBox(SugarToolbarbox):
         toolbar_edit.connect("replace-text", lambda toolbar: self.emit("replace-text"))
         self.toolbar.insert(toolbar_edit.button, -1)
 
-        toolbar_view = ViewToolbar()
+        toolbar_view = ViewToolbar(activity.conf)
         toolbar_view.connect("font-size-changed", self._font_size_changed)
         toolbar_view.connect("font-family-changed", self._font_family_changed)
-        toolbar_view.connect("show-line-numbres-changed", self._show_line_numbers_changed)
+        toolbar_view.connect("show-line-numbers-changed", self._show_line_numbers_changed)
         toolbar_view.connect("show-right-line-changed", self._show_right_line_changed)
         toolbar_view.connect("right-line-pos-changed", self._right_line_pos_changed)
+        toolbar_view.connect("theme-changed", self._theme_changed)
         self.toolbar.insert(toolbar_view.button, -1)
 
         self.toolbar.insert(utils.make_separator(True), -1)
 
         stop_button = StopButton(activity)
-        stop_button.props.accelerator = '<Ctrl><Shift>Q'
+        stop_button.props.accelerator = "<Ctrl><Shift>Q"
         self.toolbar.insert(stop_button, -1)
 
         self.button_undo = toolbar_edit.undo
@@ -270,7 +288,7 @@ class ToolbarBox(SugarToolbarbox):
         self.emit("font-family-changed", family)
 
     def _show_line_numbers_changed(self, toolbar, show):
-        self.emit("show-line-numbres-changed", show)
+        self.emit("show-line-numbers-changed", show)
 
     def _show_right_line_changed(self, toolbar, show):
         self.emit("show-right-line-changed", show)
@@ -278,3 +296,5 @@ class ToolbarBox(SugarToolbarbox):
     def _right_line_pos_changed(self, toolbar, pos):
         self.emit("right-line-pos-changed", pos)
 
+    def _theme_changed(self, toolbar, theme):
+        self.emit("theme-changed", theme)

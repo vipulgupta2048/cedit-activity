@@ -75,7 +75,7 @@ STYLE_MANAGER = GtkSource.StyleSchemeManager()
 STYLE_MANAGER.append_search_path(STYLES_PATH)
 STYLES = STYLE_MANAGER.get_scheme_ids()
 
-# FIXME: There must be many more exceptions.
+# FIXME: Maybe there are many more exceptions.
 BAD_LANGUAGES = {
     "c++": "cpp",
     ".desktop": "desktop",
@@ -86,7 +86,7 @@ screen = Gdk.Screen().get_default()
 WIDTH = (screen.get_width() / 6) * 5
 HEIGHT = (screen.get_height() / 6) * 5
 
-DEFAULT_FONTS = ['Sans', 'Serif', 'Monospace']
-USER_FONTS_FILE_PATH = env.get_profile_path('fonts')
-GLOBAL_FONTS_FILE_PATH = '/etc/sugar_fonts'
+DEFAULT_FONTS = ["Sans", "Serif", "Monospace"]
+USER_FONTS_FILE_PATH = env.get_profile_path("fonts")
+GLOBAL_FONTS_FILE_PATH = "/etc/sugar_fonts"
 

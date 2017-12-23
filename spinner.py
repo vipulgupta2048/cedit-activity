@@ -29,7 +29,7 @@ from sugar3.graphics import style
 class Spinner(Gtk.ToolItem):
 
     __gsignals__ = {
-        'value-changed': (GObject.SignalFlags.RUN_LAST, None, [int]),
+        "value-changed": (GObject.SignalFlags.RUN_LAST, None, [int]),
     }
 
     def __init__(self, value, min_value, max_value):
@@ -53,34 +53,32 @@ class Spinner(Gtk.ToolItem):
         hbox = Gtk.HBox()
         hbox.set_spacing(0)
         hbox.set_can_focus(True)
-        hbox.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
-        hbox.connect('button-press-event', self.__button_press_event_cb)
         vbox.pack_start(hbox, True, True, default_padding)
 
         self.button_down = Gtk.Button()
         self.button_down.set_can_focus(False)
         self.button_down.set_size_request(30, -1)
-        self.button_down.connect('clicked', self.__number_changed, False)
+        self.button_down.connect("clicked", self.__number_changed, False)
         hbox.pack_start(self.button_down, False, False, 5)
 
-        label = Gtk.Label('-')
-        label.modify_font(Pango.FontDescription('Bold 14'))
+        label = Gtk.Label("-")
+        label.modify_font(Pango.FontDescription("Bold 14"))
         self.button_down.add(label)
 
         self.label = Gtk.Label()
         self.label.set_text(str(self.actual_value))
         self.label.set_size_request(20, -1)
-        self.label.modify_font(Pango.FontDescription('Bold 14'))
+        self.label.modify_font(Pango.FontDescription("Bold 14"))
         hbox.pack_start(self.label, False, False, 10)
 
         self.button_up = Gtk.Button()
         self.button_up.set_can_focus(False)
         self.button_up.set_size_request(30, -1)
-        self.button_up.connect('clicked', self.__number_changed, True)
+        self.button_up.connect("clicked", self.__number_changed, True)
         hbox.pack_start(self.button_up, False, False, 5)
 
-        label = Gtk.Label('+')
-        label.modify_font(Pango.FontDescription('Bold 14'))
+        label = Gtk.Label("+")
+        label.modify_font(Pango.FontDescription("Bold 14"))
         self.button_up.add(label)
 
         radius = 2 * subcell_size
@@ -100,9 +98,6 @@ class Spinner(Gtk.ToolItem):
 
         self.show_all()
 
-    def __button_press_event_cb(self, widget, event):
-        print event.button
-
     def __number_changed(self, button, increment):
         if increment and self.actual_value < self.max_value:
             self.actual_value += 1
@@ -113,5 +108,5 @@ class Spinner(Gtk.ToolItem):
         self.button_up.set_sensitive(self.actual_value < self.max_value)
         self.button_down.set_sensitive(self.actual_value > self.min_value)
         self.label.set_text(str(self.actual_value))
-        self.emit('value-changed', self.actual_value)
+        self.emit("value-changed", self.actual_value)
 

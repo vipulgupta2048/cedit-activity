@@ -30,14 +30,14 @@ from gi.repository import GtkSource
 class InfoBar(Gtk.HBox):
 
     __gsignals__ = {
-        'language-changed': (GObject.SIGNAL_RUN_FIRST, None, [str])
+        "language-changed": (GObject.SIGNAL_RUN_FIRST, None, [str])
     }
 
     def __init__(self):
         Gtk.HBox.__init__(self)
 
         self.language = None
-        self.languages = [_('Plain text')]
+        self.languages = [_("Plain text")]
         self.language_manager = GtkSource.LanguageManager()
         self.languages.extend(self.language_manager.get_language_ids())
         
@@ -47,7 +47,7 @@ class InfoBar(Gtk.HBox):
             self.combo.append_text(language)
 
         self.combo.set_active(0)
-        self.combo.connect('changed', self.__combo_changed)
+        self.combo.connect("changed", self.__combo_changed)
         self.pack_end(self.combo, False, False, 10)
 
         self.label_pos = Gtk.Label()
@@ -56,10 +56,10 @@ class InfoBar(Gtk.HBox):
         self.set_pos(1, 1)
 
     def set_pos(self, line, column):
-        self.label_pos.set_label(_('Line: %s, Column: %s') % (line, column))
+        self.label_pos.set_label(_("Line: %s, Column: %s") % (line, column))
 
     def set_language(self, language):
-        if language != _('Plain text'):
+        if language != _("Plain text"):
             language = language.lower()
             if language in G.BAD_LANGUAGES:
                 language = G.BAD_LANGUAGES[language]
@@ -72,5 +72,5 @@ class InfoBar(Gtk.HBox):
             return
 
         self.language = self.languages[combo.get_active()]
-        self.emit('language-changed', self.language)
+        self.emit("language-changed", self.language)
 

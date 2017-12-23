@@ -42,10 +42,10 @@ def get_pixbuf_from_path(path, size=62):
     icon_theme = Gtk.IconTheme()
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(G.UNKNOWN, size, size)
 
-    if '/' in path:
+    if "/" in path:
         _file = Gio.File.new_for_path(path)
         info = _file.query_info(
-            'standard::icon', Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, None)
+            "standard::icon", Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, None)
         icon = info.get_icon()
         types = icon.get_names()
 
@@ -54,7 +54,7 @@ def get_pixbuf_from_path(path, size=62):
         if os.path.ismount(path):
             return GdkPixbuf.Pixbuf.new_from_file_at_size(G.MOUNT, size, size)
 
-        if 'image-x-generic' in types:
+        if "image-x-generic" in types:
             return GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
 
         for tipo in types:
@@ -62,18 +62,18 @@ def get_pixbuf_from_path(path, size=62):
                 return GdkPixbuf.Pixbuf.new_from_file_at_size(
                     G.IMAGES[tipo], size, size)
 
-        if path.endswith('.desktop'):
+        if path.endswith(".desktop"):
             cfg = ConfigParser.ConfigParser()
             cfg.read([path])
 
-            if cfg.has_option('Desktop Entry', 'Icon'):
-                if '/' in cfg.get('Desktop Entry', 'Icon'):
-                    d = cfg.get('Desktop Entry', 'Icon')
+            if cfg.has_option("Desktop Entry", "Icon"):
+                if "/" in cfg.get("Desktop Entry", "Icon"):
+                    d = cfg.get("Desktop Entry", "Icon")
                     return GdkPixbuf.Pixbuf.new_from_file_at_size(d, size, size)
 
                 else:
                     return icon_theme.load_icon(
-                        cfg.get('Desktop Entry', 'Icon'), size, 0)
+                        cfg.get("Desktop Entry", "Icon"), size, 0)
 
             else:
                 return icon_theme.load_icon(icon, size, 0)
@@ -95,12 +95,12 @@ def get_language_from_file(path):
     if not language:
         type = Gio.content_type_guess(path, [])[0]
 
-        if 'x-' in type:
-            type = type.replace('x-', '')
-        if 'text/' in type:
-            type = type.replace('text/', '')
-        if type == 'shellscript':
-            type = 'sh'
+        if "x-" in type:
+            type = type.replace("x-", "")
+        if "text/" in type:
+            type = type.replace("text/", "")
+        if type == "shellscript":
+            type = "sh"
 
         language = G.LANGUAGE_MANAGER.get_language(type)
 

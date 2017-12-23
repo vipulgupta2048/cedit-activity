@@ -64,9 +64,10 @@ class CEdit(activity.Activity):
         self.toolbar_box.connect("replace-text", self.replace_text)
         self.toolbar_box.connect("font-size-changed", self.font_size_changed)
         self.toolbar_box.connect("font-family-changed", self.font_family_changed)
-        self.toolbar_box.connect("show-line-numbres-changed", self.show_line_numbers_changed)
+        self.toolbar_box.connect("show-line-numbers-changed", self.show_line_numbers_changed)
         self.toolbar_box.connect("show-right-line-changed", self.show_right_line_changed)
         self.toolbar_box.connect("right-line-pos-changed", self.right_line_pos_changed)
+        self.toolbar_box.connect("theme-changed", self.theme_changed)
         self.set_toolbar_box(self.toolbar_box)
 
         self.make_notebook()
@@ -419,8 +420,8 @@ class CEdit(activity.Activity):
         self.conf['font'] = font
         self.set_conf_to_views()
 
-    def show_line_numbers_changed(self, widget):
-        self.conf['show-line-numbers'] = widget.get_active()
+    def show_line_numbers_changed(self, widget, show):
+        self.conf['show-line-numbers'] = show
         self.set_conf_to_views()
 
     def show_right_line_changed(self, widget, show):

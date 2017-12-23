@@ -33,14 +33,14 @@ from gi.repository import GtkSource
 class Buffer(GtkSource.Buffer):
 
     __gsignals__ = {
-        'language-changed': (GObject.SIGNAL_RUN_FIRST, None, [str])
+        "language-changed": (GObject.SIGNAL_RUN_FIRST, None, [str])
     }
 
     def __init__(self):
         GtkSource.Buffer.__init__(self)
         self.language = None
         self.language_setted = False
-        self.languages = [_('Plain text')]
+        self.languages = [_("Plain text")]
         self.language_manager = GtkSource.LanguageManager()
         self.languages.extend(self.language_manager.get_language_ids())
 
@@ -54,16 +54,16 @@ class Buffer(GtkSource.Buffer):
         if self.language:
             self.set_highlight_syntax(True)
             self.set_language(self.language)
-            self.emit('language-changed', self.language.get_name())
+            self.emit("language-changed", self.language.get_name())
 
         elif not self.language:
             self.set_highlight_syntax(False)
-            self.emit('language-changed', _('Plain text'))
+            self.emit("language-changed", _("Plain text"))
 
         self.language_setted = False
 
     def set_language_from_string(self, language):
-        if language == _('Plain text'):
+        if language == _("Plain text"):
             self.language = None
             self.set_highlight_syntax(False)
 
@@ -81,7 +81,7 @@ class Buffer(GtkSource.Buffer):
         if self.language:
             return self.language.get_name().lower()
 
-        return _('Plain text')
+        return _("Plain text")
 
     def get_all_text(self):
         start, end = self.get_bounds()
@@ -91,7 +91,7 @@ class Buffer(GtkSource.Buffer):
 class View(GtkSource.View):
 
     __gsignals__ = {
-        'title-changed': (GObject.SIGNAL_RUN_FIRST, None, [str]),
+        "title-changed": (GObject.SIGNAL_RUN_FIRST, None, [str]),
     }
 
     def __init__(self, conf):
@@ -102,10 +102,10 @@ class View(GtkSource.View):
         self.style_manager = G.STYLE_MANAGER
 
         self.buffer = Buffer()
-        self.buffer.connect('modified-changed', self.buffer_changed)
+        self.buffer.connect("modified-changed", self.buffer_changed)
         self.set_buffer(self.buffer)
 
-        self.tag_search = self.buffer.create_tag('search', foreground='#5E82FF', background='#078D00')
+        self.tag_search = self.buffer.create_tag("search", foreground="#5E82FF", background="#078D00")
 
         self.set_conf(conf)
 
@@ -122,15 +122,15 @@ class View(GtkSource.View):
 
     def set_conf(self, conf):
         self.conf = conf
-        font = '%s %d' % (conf['font'], conf['font-size'])
+        font = "%s %d" % (conf["font"], conf["font-size"])
 
         self.modify_font(Pango.FontDescription(font))
-        self.set_tab_width(conf['tab-width'])
-        self.set_insert_spaces_instead_of_tabs(conf['use-spaces'])
-        self.buffer.set_style_scheme(self.style_manager.get_scheme(conf['theme']))
-        self.set_show_line_numbers(conf['show-line-numbers'])
-        self.set_show_right_margin(conf['show-right-line'])
-        self.set_right_margin_position(conf['right-line-pos'])
+        self.set_tab_width(conf["tab-width"])
+        self.set_insert_spaces_instead_of_tabs(conf["use-spaces"])
+        self.buffer.set_style_scheme(self.style_manager.get_scheme(conf["theme"]))
+        self.set_show_line_numbers(conf["show-line-numbers"])
+        self.set_show_right_margin(conf["show-right-line"])
+        self.set_right_margin_position(conf["right-line-pos"])
 
     def search(self, text, enter):
         start, end = self.buffer.get_bounds()
@@ -204,7 +204,7 @@ class View(GtkSource.View):
 
     def set_file(self, path, _open=True):
         if os.path.isfile(path) and _open:
-            with open(path, 'r') as file:
+            with open(path, "r") as file:
                 text = file.read()
 
             self.buffer.set_text(text)
@@ -227,20 +227,20 @@ class View(GtkSource.View):
         if self.file != path:
             self.file = path
 
-        with open(self.file, 'w') as file:
+        with open(self.file, "w") as file:
             file.write(self.buffer.get_all_text())
 
-        self.emit('title-changed', self.get_file_name())
+        self.emit("title-changed", self.get_file_name())
 
     def get_file(self):
         return self.file
 
     def get_file_name(self):
         if self.file:
-            return self.file.split('/')[-1]
+            return self.file.split("/")[-1]
         else:
-            return _('New file')
+            return _("New file")
 
     def emit_title_changed(self):
-        self.emit('title-changed', self.get_file_name())
+        self.emit("title-changed", self.get_file_name())
 
