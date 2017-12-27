@@ -214,7 +214,7 @@ class CEdit(activity.Activity):
 
     def file_chooser_open(self, widget):
         path = self.get_view().get_file()
-        file_chooser = FileChooserOpen(self, path)
+        file_chooser = FileChooserOpen(path)
         file_chooser.connect('open-file', self._open_file_from_chooser)
         file_chooser.show_all()
 

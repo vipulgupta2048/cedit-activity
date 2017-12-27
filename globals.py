@@ -20,7 +20,7 @@ TEXT_FILE_NOT_EXISTS1 = _("This file not exists.")
 TEXT_FILE_NOT_EXISTS2 = _("Apparently you've selected a file that does not exist.")
 TEXT_ERROR_CREATING_FOLDER = _("Error creating the folder.")
 TEXT_FILE_ALREADY_EXISTS = _("This file is already exists.")
-TEXT_OVERWRITE_QUESTION = _("**** already exists, Overwrite it?")
+TEXT_OVERWRITE_QUESTION = _("**** already exists. Overwrite it?")
 
 ICONS = os.path.join(os.path.dirname(__file__), "icons/")
 
