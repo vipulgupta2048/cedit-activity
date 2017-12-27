@@ -81,7 +81,8 @@ STYLES = STYLE_MANAGER.get_scheme_ids()
 BAD_LANGUAGES = {
     "c++": "cpp",
     ".desktop": "desktop",
-    "marcar": "markdown"
+    "marcar": "markdown",
+    "javascript": "js",
 }
 
 screen = Gdk.Screen().get_default()
