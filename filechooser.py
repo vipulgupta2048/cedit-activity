@@ -320,7 +320,7 @@ class FileChooserSave(Gtk.Window):
         self.set_modal(True)
         self.set_decorated(False)
         self.set_resizable(False)
-        self.set_size_request(WIDTH, HEIGHT)
+        self.set_size_request(G.WIDTH, G.HEIGHT)
         self.set_border_width(style.LINE_WIDTH)
         self.add_events(Gdk.EventMask.KEY_RELEASE_MASK)
         self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
