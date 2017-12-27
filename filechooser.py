@@ -26,6 +26,7 @@ import globals as G
 
 from gi.repository import Gtk
 from gi.repository import Gdk
+from gi.repository import Gio
 from gi.repository import GObject
 from gi.repository import GdkPixbuf
 
@@ -41,9 +42,12 @@ class FileChooser(Gtk.Window):
     def __init__(self, folder=None):
         Gtk.Window.__init__(self)
 
-        self.model = Gtk.ListStore(str, GdkPixbuf.Pixbuf)
+        self.model = Gtk.ListStore(str, GdkPixbuf.Pixbuf, str)
 
-        self.folder = folder or os.path.expanduser("~/")
+        self.folder = folder
+        if folder is None or not os.path.exists(self.folder):
+            self.folder = os.path.expanduser("~/")
+
         self.files = []
         self.show_hidden_files = False
 
@@ -72,32 +76,85 @@ class FileChooser(Gtk.Window):
         self.view.set_pixbuf_column(1)
         scrolled.add(self.view)
 
+        self._gfile = Gio.File.new_for_path(self.folder)
+        self._file_monitor = Gio.File.monitor(self._gfile, Gio.FileMonitorFlags.NONE, None)
+        self._file_monitor.connect("changed", self.__files_changed_cb)
+
+        #GObject.timeout_add(500, self.check_files)
+
+    def __files_changed_cb(self, monitor, file, o, event):
+        if event == Gio.FileMonitorEvent.DELETED:
+            if file.equal(Gio.File.new_for_path(self.folder)):
+                self.go_up()
+
+            else:
+                self.__remove_item(file.get_path())
+
+        elif event == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
+            self.__append_item(file.get_path())
+
+    def __append_item(self, path):
+        filename = os.path.basename(path)
+        self.files.append(filename)
+
+        if utils.is_hidden_filename(filename) and not self.show_hidden_files:
+            return
+
+        folders, files = utils.split_directory_content(self.folder, self.files)
+
+        # We can't use folders.index/files.index because it always include hidden directories/files
+        index = 0
+
+        # Include directories in case path is a file because all files are
+        # displayed after directories
+        for _path in folders:
+            name = utils.get_path_name(_path)
+            if utils.is_hidden_filename(name) and not self.show_hidden_files:
+                continue
+
+            if name == filename and os.path.isdir(path):
+                break
+
+            index += 1
+
+        if os.path.isfile(path):
+            for _path in files:
+                name = utils.get_path_name(_path)
+                if utils.is_hidden_filename(name) and not self.show_hidden_files:
+                    continue
+
+                if name == filename:
+                    break
+
+                index += 1
+
+        self.model.insert(index, [filename, utils.get_pixbuf_from_path(path), path])
+
+    def __remove_item(self, path):
+        filename = os.path.basename(path)
+
+        for row in self.model:
+            if row[0] == filename:
+                self.model.remove(row.iter)
+                break
+
     def go_up(self, button=None, _return=None):
         pass
 
     def show_folder(self):
-        self.files = os.listdir(self.folder)
-        self.files.sort()
+        folders, files = utils.get_directory_content(self.folder)
         self.model.clear()
 
-        folders = []
-        files = []
-
-        for x in self.files:
-            path = os.path.join(self.folder, x)
-            if os.path.isdir(path):
-                folders.append(path)
-
-            elif os.path.isfile(path):
-                files.append(path)
-
         for path in folders + files:
+            filename = utils.get_path_name(path)
+            self.files.append(filename)
+
             if not self.show_hidden_files:
-                if path.endswith("~") or path.split("/")[-1].startswith("."):
+                if filename.endswith("~") or filename.startswith("."):
                     continue
 
             pixbuf = utils.get_pixbuf_from_path(path)
-            self.model.append([path.split("/")[-1], pixbuf])
+            self.model.append([filename, pixbuf, path])
 
     def check_files(self):
         files = os.listdir(self.folder)
@@ -139,8 +196,6 @@ class FileChooserOpen(FileChooser):
         self.show_folder()
 
         self.show_all()
-
-        GObject.timeout_add(500, self.check_files)
 
     def __make_toolbar(self):
         self.toolbar = Gtk.Toolbar()
@@ -343,8 +398,6 @@ class FileChooserSave(FileChooser):
         self.show_folder()
 
         self.show_all()
-
-        GObject.timeout_add(500, self.check_files)
 
     def __make_toolbar(self):
         self.toolbar = Gtk.Toolbar()

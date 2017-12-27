@@ -111,3 +111,40 @@ def get_path_access(path):
     #  R_OK = Readable, W_OK = Writable
     return os.access(path, os.R_OK), os.access(path, os.W_OK)
 
+
+def is_hidden_filename(name):
+    return name.startswith(".") or name.endswith("~")
+
+
+def is_hidden_path(path):
+    gfile = Gio.File.new_for_path(path)
+    filename = os.path.basename(gfile.get_path())
+
+    return is_hidden_filename(filename)
+
+
+def split_directory_content(directory, content):
+    content.sort()
+
+    folders = []
+    files = []
+
+    for x in content:
+        path = os.path.join(directory, x)
+        if os.path.isdir(path):
+            folders.append(path)
+
+        elif os.path.isfile(path):
+            files.append(path)
+
+    return folders, files
+
+
+def get_directory_content(directory):
+    content = os.listdir(directory)
+    return split_directory_content(directory, content)
+
+
+def get_path_name(path):
+    gfile = Gio.File.new_for_path(path)  # Standardize path
+    return os.path.basename(gfile.get_path())
