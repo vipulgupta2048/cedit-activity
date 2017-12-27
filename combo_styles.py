@@ -48,4 +48,3 @@ class ComboStyles(Gtk.ToolItem):
 
     def __theme_changed(self, widget):
         self.emit("theme-changed", self.styles[self.combo.get_active()])
-

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
 #   font.py por:
 #   Cristian García <cristian99garcia@gmail.com>
 #
@@ -21,6 +21,7 @@
 import globals as G
 
 import os
+import shutil
 from gettext import gettext as _
 
 from gi.repository import Gtk
@@ -85,7 +86,8 @@ class FontComboBox(Gtk.ToolItem):
         css_provider = Gtk.CssProvider()
         css_provider.load_from_data(theme)
         style_context = bt.get_style_context()
-        style_context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        style_context.add_provider(
+            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         self._hide_tooltip_on_click = True
         self._palette_invoker.attach_tool(self)
@@ -122,12 +124,13 @@ class FontComboBox(Gtk.ToolItem):
                 shutil.copy(G.GLOBAL_FONTS_FILE_PATH, G.USER_FONTS_FILE_PATH)
 
         if os.path.exists(G.USER_FONTS_FILE_PATH):
-            fonts_file = open(USER_FONTS_FILE_PATH)
+            fonts_file = open(G.USER_FONTS_FILE_PATH)
             for line in fonts_file:
                 self._font_white_list.append(line.strip())
 
             gio_fonts_file = Gio.File.new_for_path(G.USER_FONTS_FILE_PATH)
-            self.monitor = gio_fonts_file.monitor_file(Gio.FileMonitorFlags.NONE, None)
+            self.monitor = gio_fonts_file.monitor_file(
+                Gio.FileMonitorFlags.NONE, None)
             self.monitor.set_rate_limit(5000)
             self.monitor.connect("changed", self._reload_fonts)
 
@@ -136,8 +139,8 @@ class FontComboBox(Gtk.ToolItem):
             return
 
         self._font_white_list = []
-        self._font_white_list.extend(DEFAULT_FONTS)
-        fonts_file = open(USER_FONTS_FILE_PATH)
+        self._font_white_list.extend(G.DEFAULT_FONTS)
+        fonts_file = open(G.USER_FONTS_FILE_PATH)
 
         for line in fonts_file:
             self._font_white_list.append(line.strip())
@@ -185,7 +188,8 @@ class FontComboBox(Gtk.ToolItem):
     def set_palette(self, palette):
         self._palette_invoker.palette = palette
 
-    palette = GObject.property(type=object, setter=set_palette, getter=get_palette)
+    palette = GObject.property(
+        type=object, setter=set_palette, getter=get_palette)
 
     def get_palette_invoker(self):
         return self._palette_invoker
@@ -194,7 +198,8 @@ class FontComboBox(Gtk.ToolItem):
         self._palette_invoker.detach()
         self._palette_invoker = palette_invoker
 
-    palette_invoker = GObject.property(type=object, setter=set_palette_invoker, getter=get_palette_invoker)
+    palette_invoker = GObject.property(
+        type=object, setter=set_palette_invoker, getter=get_palette_invoker)
 
     def set_font_name(self, font_name):
         self._font_label.set_font(font_name)
@@ -213,7 +218,8 @@ class FontSize(Gtk.ToolItem):
 
         Gtk.ToolItem.__init__(self)
 
-        self._font_sizes = [8, 9, 10, 11, 12, 14, 16, 20, 22, 24, 26, 28, 36, 48, 72]
+        self._font_sizes = [
+            8, 9, 10, 11, 12, 14, 16, 20, 22, 24, 26, 28, 36, 48, 72]
 
         if style.zoom(100) == 100:
             subcell_size = 15
@@ -248,18 +254,22 @@ class FontSize(Gtk.ToolItem):
         hbox.pack_start(self._size_up, False, False, 5)
 
         radius = 2 * subcell_size
-        theme_up = "GtkButton {border-radius:0px %dpx %dpx 0px;}" % (radius, radius)
+        theme_up = \
+            "GtkButton {border-radius:0px %dpx %dpx 0px;}" % (radius, radius)
         css_provider_up = Gtk.CssProvider()
         css_provider_up.load_from_data(theme_up)
 
         style_context = self._size_up.get_style_context()
-        style_context.add_provider(css_provider_up, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        style_context.add_provider(
+            css_provider_up, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        theme_down = "GtkButton {border-radius: %dpx 0px 0px %dpx;}" % (radius, radius)
+        theme_down = \
+            "GtkButton {border-radius: %dpx 0px 0px %dpx;}" % (radius, radius)
         css_provider_down = Gtk.CssProvider()
         css_provider_down.load_from_data(theme_down)
         style_context = self._size_down.get_style_context()
-        style_context.add_provider(css_provider_down, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        style_context.add_provider(
+                css_provider_down, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         self.show_all()
 
@@ -303,4 +313,3 @@ class FontSize(Gtk.ToolItem):
 
     def get_font_size(self):
         return self._font_size
-

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
 #   infobar.py por:
 #   Cristian García <cristian99garcia@gmail.com>
 #
@@ -39,8 +39,9 @@ class InfoBar(Gtk.HBox):
         self.language = None
         self.languages = [_("Plain text")]
         self.language_manager = GtkSource.LanguageManager()
-        self.languages.extend(self.language_manager.get_language_ids())
-        
+        self.languages.extend(
+            self.language_manager.get_language_ids())
+
         self.combo = Gtk.ComboBoxText()
 
         for language in self.languages:
@@ -73,4 +74,3 @@ class InfoBar(Gtk.HBox):
 
         self.language = self.languages[combo.get_active()]
         self.emit("language-changed", self.language)
-

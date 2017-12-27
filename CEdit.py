@@ -18,8 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-import os
-import sys
 from gettext import gettext as _
 
 import utils
@@ -28,7 +26,6 @@ import globals as G
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Pango
-from gi.repository import GObject
 from gi.repository import GtkSource
 
 from view import View
@@ -63,49 +60,55 @@ class CEdit(activity.Activity):
         self.toolbar_box.connect("search-text", self.search_text)
         self.toolbar_box.connect("replace-text", self.replace_text)
         self.toolbar_box.connect("font-size-changed", self.font_size_changed)
-        self.toolbar_box.connect("font-family-changed", self.font_family_changed)
-        self.toolbar_box.connect("show-line-numbers-changed", self.show_line_numbers_changed)
-        self.toolbar_box.connect("show-right-line-changed", self.show_right_line_changed)
-        self.toolbar_box.connect("right-line-pos-changed", self.right_line_pos_changed)
+        self.toolbar_box.connect(
+                "font-family-changed", self.font_family_changed)
+        self.toolbar_box.connect(
+                "show-line-numbers-changed", self.show_line_numbers_changed)
+        self.toolbar_box.connect(
+                "show-right-line-changed", self.show_right_line_changed)
+        self.toolbar_box.connect(
+                "right-line-pos-changed", self.right_line_pos_changed)
         self.toolbar_box.connect("theme-changed", self.theme_changed)
         self.set_toolbar_box(self.toolbar_box)
 
         self.make_notebook()
 
-        self.infobar.connect('language-changed', self.set_language)
+        self.infobar.connect("language-changed", self.set_language)
 
         self.vbox.pack_end(self.infobar, False, False, 0)
         self.set_canvas(self.vbox)
         self.show_all()
 
     def get_conf(self):
-        if 'saved' in self.metadata:
+        if "saved" in self.metadata:
             self.conf = {}
-            self.conf['font'] = str(self.metadata['font'])
-            self.conf['font-size'] = int(self.metadata['font-size'])
-            self.conf['show-line-numbers'] = bool(int(self.metadata['show-line-numbers']))
-            self.conf['tab-width'] = int(self.metadata['tab-width'])
-            self.conf['use-spaces'] = bool(int(self.metadata['use-spaces']))
-            self.conf['theme'] = str(self.metadata['theme'])
-            self.conf['right-line-pos'] = int(self.metadata['right-line-pos'])
-            self.conf['show-right-line'] = bool(int(self.metadata['show-right-line']))
+            self.conf["font"] = str(self.metadata["font"])
+            self.conf["font-size"] = int(self.metadata["font-size"])
+            self.conf["show-line-numbers"] = \
+                bool(int(self.metadata["show-line-numbers"]))
+            self.conf["tab-width"] = int(self.metadata["tab-width"])
+            self.conf["use-spaces"] = bool(int(self.metadata["use-spaces"]))
+            self.conf["theme"] = str(self.metadata["theme"])
+            self.conf["right-line-pos"] = int(self.metadata["right-line-pos"])
+            self.conf["show-right-line"] = \
+                bool(int(self.metadata["show-right-line"]))
 
         else:
             self.conf = {
-                'font': 'Monospace',
-                'font-size': 14,
-                'show-line-numbers': True,
-                'tab-width': 4,
-                'use-spaces': True,
-                'theme': 'classic',
-                'right-line-pos': 80,
-                'show-right-line': False,
+                "font": "Monospace",
+                "font-size": 14,
+                "show-line-numbers": True,
+                "tab-width": 4,
+                "use-spaces": True,
+                "theme": "classic",
+                "right-line-pos": 80,
+                "show-right-line": False,
             }
 
     def make_notebook(self):
         self.notebook = Gtk.Notebook()
         button_add = Gtk.ToolButton.new_from_stock(Gtk.STOCK_ADD)
-        button_add.connect('clicked', lambda w: self.new_page())
+        button_add.connect("clicked", lambda w: self.new_page())
 
         self.notebook.set_scrollable(True)
         self.notebook.set_show_tabs(True)
@@ -114,9 +117,9 @@ class CEdit(activity.Activity):
         self.notebook.add_events(Gdk.EventMask.SCROLL_MASK |
                                  Gdk.EventMask.SMOOTH_SCROLL_MASK)
 
-        self.notebook.connect('switch-page', self.update_buttons)
-        self.notebook.connect('scroll-event', self.notebook_scrolled)
-        self.notebook.connect('page-removed', self.page_removed)
+        self.notebook.connect("switch-page", self.update_buttons)
+        self.notebook.connect("scroll-event", self.notebook_scrolled)
+        self.notebook.connect("page-removed", self.page_removed)
 
         self.vbox.pack_start(self.notebook, True, True, 2)
         self.new_page()
@@ -155,28 +158,31 @@ class CEdit(activity.Activity):
         self.toolbar_box.button_undo.set_sensitive(buffer.can_undo())
         self.toolbar_box.button_redo.set_sensitive(buffer.can_redo())
         self.toolbar_box.button_save.set_sensitive(buffer.get_modified())
-        self.toolbar_box.entry_search.set_sensitive(bool(buffer.get_all_text()))
-        self.toolbar_box.entry_replace.set_sensitive(bool(buffer.get_all_text()))
-        self.toolbar_box.spinner_right_line.set_sensitive(self.conf['show-right-line'])
+        self.toolbar_box.entry_search.set_sensitive(
+                bool(buffer.get_all_text()))
+        self.toolbar_box.entry_replace.set_sensitive(
+                bool(buffer.get_all_text()))
+        self.toolbar_box.spinner_right_line.set_sensitive(
+                self.conf["show-right-line"])
         self.infobar.set_language(buffer.get_language_str())
         self.update_cursor_position(buffer)
 
     def new_page(self, view=None, label=None):
         if not view:
             view = View(self.conf)
-            view.buffer.connect('changed', self.update_buttons)
-            view.buffer.connect('mark-set', self.update_cursor_position)
+            view.buffer.connect("changed", self.update_buttons)
+            view.buffer.connect("mark-set", self.update_cursor_position)
             view.buffer.connect(
-                'language-changed', self.set_language_from_buffer)
+                "language-changed", self.set_language_from_buffer)
 
         if not label:
             label = view.get_file_name()
 
         if type(label) == str:
             label = Gtk.Label(label)
-            label.modify_font(Pango.FontDescription('15 bold'))
+            label.modify_font(Pango.FontDescription("15 bold"))
 
-        view.connect('title-changed', self.change_title_from_view)
+        view.connect("title-changed", self.change_title_from_view)
 
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
@@ -193,7 +199,7 @@ class CEdit(activity.Activity):
         button.set_size_request(12, 12)
         button.set_image(
             Gtk.Image.new_from_stock(Gtk.STOCK_CLOSE, Gtk.IconSize.MENU))
-        button.connect('clicked', self.remove_page_from_widget, scrolled)
+        button.connect("clicked", self.remove_page_from_widget, scrolled)
         hbox.pack_start(button, False, False, 0)
 
         self.notebook.append_page(scrolled, hbox)
@@ -215,7 +221,7 @@ class CEdit(activity.Activity):
     def file_chooser_open(self, widget):
         path = self.get_view().get_file()
         file_chooser = FileChooserOpen(path)
-        file_chooser.connect('open-file', self._open_file_from_chooser)
+        file_chooser.connect("open-file", self._open_file_from_chooser)
         file_chooser.show_all()
 
     def file_chooser_save(self, widget, force=False, close=False):
@@ -229,7 +235,7 @@ class CEdit(activity.Activity):
             return
 
         file_chooser = FileChooserSave()
-        file_chooser.connect('save-file', self._save_file_from_chooser, close)
+        file_chooser.connect("save-file", self._save_file_from_chooser, close)
         file_chooser.show_all()
 
     def begin_print(self, operation, context, compositor):
@@ -259,7 +265,7 @@ class CEdit(activity.Activity):
             button = buttonbox.get_children()[0]
             buttonbox.remove(button)
 
-            alert.connect('response', _alert_response)
+            alert.connect("response", _alert_response)
 
             self.vbox.pack_start(alert, False, False, 0)
             self.vbox.reorder_child(alert, 0)
@@ -268,21 +274,21 @@ class CEdit(activity.Activity):
 
         compositor = GtkSource.PrintCompositor.new_from_view(view)
         compositor.set_highlight_syntax(buffer.get_highlight_syntax())
-        compositor.set_print_line_numbers(self.conf['show-line-numbers'])
+        compositor.set_print_line_numbers(self.conf["show-line-numbers"])
 
         if view.buffer.language:
-            compositor.set_header_format(False, '%s - %s' % (
+            compositor.set_header_format(False, "%s - %s" % (
                 view.buffer.get_language_str(), view.get_file()), None, None)
 
-        compositor.set_footer_format(True, '%T', path, 'Page %N/%Q')
+        compositor.set_footer_format(True, "%T", path, "Page %N/%Q")
         compositor.set_print_header(True)
         compositor.set_print_footer(True)
 
         operation = Gtk.PrintOperation()
         operation.set_job_name(path)
 
-        operation.connect('begin-print', self.begin_print, compositor)
-        operation.connect('draw-page', self.draw_page, compositor)
+        operation.connect("begin-print", self.begin_print, compositor)
+        operation.connect("draw-page", self.draw_page, compositor)
 
         res = operation.run(Gtk.PrintOperationAction.PRINT_DIALOG, None)
         if res == Gtk.PrintOperationResult.ERROR:
@@ -291,7 +297,7 @@ class CEdit(activity.Activity):
                 Gtk.DialogFlags.DESTROY_WITH_PARENT,
                 Gtk.MessageType.ERROR,
                 Gtk.ButtonsType.OK,
-                'Error to print the file: %s' % path)
+                "Error to print the file: %s" % path)
 
             dialog.run()
             dialog.destroy()
@@ -341,26 +347,24 @@ class CEdit(activity.Activity):
 
         else:
             name = view.get_file_name()
-            title = G.TEXT_SAVE_FILE.replace('****', name)
+            title = G.TEXT_SAVE_FILE.replace("****", name)
             msg = G.TEXT_IF_NOT_SAVE
             cancel = Gtk.Image.new_from_icon_name(
-                'dialog-cancel', Gtk.IconSize.MENU)
+                "dialog-cancel", Gtk.IconSize.MENU)
             no = Gtk.Image.new_from_icon_name(
-                'activity-stop', Gtk.IconSize.MENU)
-            save = Gtk.Image.new_from_icon_name('filesave', Gtk.IconSize.MENU)
+                "activity-stop", Gtk.IconSize.MENU)
+            save = Gtk.Image.new_from_icon_name("filesave", Gtk.IconSize.MENU)
 
             self.alert = Alert()
             self.alert.props.title = title
             self.alert.props.msg = msg
 
-            button1 = self.alert.add_button(
-                Gtk.ResponseType.CANCEL, _('Cancel'), icon=cancel)
-            button2 = self.alert.add_button(
-                Gtk.ResponseType.NO, _('No save'), icon=no)
-            button3 = self.alert.add_button(
-                Gtk.ResponseType.YES, _('Save'), icon=save)
+            self.alert.add_button(
+                    Gtk.ResponseType.CANCEL, _("Cancel"), icon=cancel)
+            self.alert.add_button(Gtk.ResponseType.NO, _("No save"), icon=no)
+            self.alert.add_button(Gtk.ResponseType.YES, _("Save"), icon=save)
 
-            self.alert.connect('response', self._alert_response, scrolled)
+            self.alert.connect("response", self._alert_response, scrolled)
 
             self.vbox.pack_start(self.alert, False, False, 0)
             self.vbox.reorder_child(self.alert, 0)
@@ -369,6 +373,7 @@ class CEdit(activity.Activity):
     def change_title_from_view(self, view=None, label=None):
         if not view:
             view = self.get_view()
+
         if not label:
             label = view.get_file_name()
 
@@ -379,10 +384,10 @@ class CEdit(activity.Activity):
 
         widget.set_label(label)
 
-        color = '#FF0000' if changed else '#FFFFFF'
+        color = "#FF0000" if changed else "#FFFFFF"
         if view.get_file():
             readable, writable = utils.get_path_access(view.get_file())
-            color = '#4A90D9' if not writable else color
+            color = "#4A90D9" if not writable else color
             widget.set_tooltip_text(G.TEXT_HAVE_NOT_PERMISSIONS)
 
         widget.modify_fg(Gtk.StateType.NORMAL, Gdk.color_parse(color))
@@ -413,32 +418,32 @@ class CEdit(activity.Activity):
         self.get_view().replace(text_search, text_replace)
 
     def font_size_changed(self, widget, font_size):
-        self.conf['font-size'] = font_size
+        self.conf["font-size"] = font_size
         self.set_conf_to_views()
 
     def font_family_changed(self, widget, font):
-        self.conf['font'] = font
+        self.conf["font"] = font
         self.set_conf_to_views()
 
     def show_line_numbers_changed(self, widget, show):
-        self.conf['show-line-numbers'] = show
+        self.conf["show-line-numbers"] = show
         self.set_conf_to_views()
 
     def show_right_line_changed(self, widget, show):
-        self.conf['show-right-line'] = show
+        self.conf["show-right-line"] = show
         self.update_buttons()
         self.set_conf_to_views()
 
     def right_line_pos_changed(self, widget, value):
-        self.conf['right-line-pos'] = value
+        self.conf["right-line-pos"] = value
         self.set_conf_to_views()
 
     def theme_changed(self, widget, theme):
-        self.conf['theme'] = theme
+        self.conf["theme"] = theme
         self.set_conf_to_views()
 
     def tab_width_changed(self, widget, tab_width):
-        self.conf['tab-width'] = tab_width
+        self.conf["tab-width"] = tab_width
         self.set_conf_to_views()
 
     def set_conf_to_views(self):
@@ -449,6 +454,7 @@ class CEdit(activity.Activity):
     def _alert_response(self, widget, response, scrolled):
         if response == Gtk.ResponseType.NO:
             self.remove_page_from_widget(None, scrolled, force=True)
+
         elif response == Gtk.ResponseType.YES:
             self.file_chooser_save(None, False, True)
 
@@ -462,15 +468,15 @@ class CEdit(activity.Activity):
             if view.get_file():
                 files.append(view.get_file)
 
-        self.metadata['saved'] = True
-        self.metadata['font'] = self.conf['font']
-        self.metadata['font-size'] = self.conf['font-size']
-        self.metadata['show-line-numbers'] = self.conf['show-line-numbers']
-        self.metadata['tab-width'] = self.conf['tab-width']
-        self.metadata['use-spaces'] = self.conf['use-spaces']
-        self.metadata['theme'] = self.conf['theme']
-        self.metadata['right-line-pos'] = self.conf['right-line-pos']
-        self.metadata['show-right-line'] = self.conf['show-right-line']
+        self.metadata["saved"] = True
+        self.metadata["font"] = self.conf["font"]
+        self.metadata["font-size"] = self.conf["font-size"]
+        self.metadata["show-line-numbers"] = self.conf["show-line-numbers"]
+        self.metadata["tab-width"] = self.conf["tab-width"]
+        self.metadata["use-spaces"] = self.conf["use-spaces"]
+        self.metadata["theme"] = self.conf["theme"]
+        self.metadata["right-line-pos"] = self.conf["right-line-pos"]
+        self.metadata["show-right-line"] = self.conf["show-right-line"]
 
     def _exit(self, *args):
         def _remove_page(widget, scrolled):
@@ -493,8 +499,9 @@ class CEdit(activity.Activity):
                     return
 
                 file_chooser = FileChooserSave()
-                file_chooser.connect('save-file', self._save_file_from_chooser, True)
-                file_chooser.connect('destroy', _remove_page, scrolled)
+                file_chooser.connect(
+                        "save-file", self._save_file_from_chooser, True)
+                file_chooser.connect("destroy", _remove_page, scrolled)
                 file_chooser.show_all()
 
             else:
@@ -502,24 +509,22 @@ class CEdit(activity.Activity):
                 check_modified()
 
         def _create_alert(name, scrolled):
-            title = G.TEXT_SAVE_CHANGES_QUESTION.replace('****', name)
-            msg = G.TEXT_LOST_FOREVER
+            title = G.TEXT_SAVE_CHANGES_QUESTION.replace("****", name)
+            msg = G.TEXT_IF_NOT_SAVE
 
             no = Gtk.Image.new_from_icon_name(
-                'activity-stop', Gtk.IconSize.MENU)
-            save = Gtk.Image.new_from_icon_name('filesave',
-                Gtk.IconSize.MENU)
+                    "activity-stop", Gtk.IconSize.MENU)
+
+            save = Gtk.Image.new_from_icon_name("filesave", Gtk.IconSize.MENU)
 
             alert = Alert()
             alert.props.title = title
             alert.props.msg = msg
 
-            button1 = alert.add_button(
-                Gtk.ResponseType.NO, _('No save'), icon=no)
-            button2 = alert.add_button(
-                Gtk.ResponseType.YES, _('Save'), icon=save)
+            alert.add_button(Gtk.ResponseType.NO, _("No save"), icon=no)
+            alert.add_button(Gtk.ResponseType.YES, _("Save"), icon=save)
 
-            alert.connect('response', _alert_response, scrolled)
+            alert.connect("response", _alert_response, scrolled)
 
             self.vbox.pack_start(alert, False, False, 0)
             self.vbox.reorder_child(alert, 0)
@@ -548,4 +553,3 @@ class CEdit(activity.Activity):
 
         self.reopen = False
         check_modified()
-

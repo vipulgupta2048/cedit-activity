@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
 #   view.py por:
 #   Cristian García <cristian99garcia@gmail.com>
 #
@@ -24,7 +24,6 @@ from gettext import gettext as _
 import utils
 import globals as G
 
-from gi.repository import Gtk
 from gi.repository import Pango
 from gi.repository import GObject
 from gi.repository import GtkSource
@@ -105,7 +104,8 @@ class View(GtkSource.View):
         self.buffer.connect("modified-changed", self.buffer_changed)
         self.set_buffer(self.buffer)
 
-        self.tag_search = self.buffer.create_tag("search", foreground="#5E82FF", background="#078D00")
+        self.tag_search = self.buffer.create_tag(
+            "search", foreground="#5E82FF", background="#078D00")
 
         self.set_conf(conf)
 
@@ -127,7 +127,8 @@ class View(GtkSource.View):
         self.modify_font(Pango.FontDescription(font))
         self.set_tab_width(conf["tab-width"])
         self.set_insert_spaces_instead_of_tabs(conf["use-spaces"])
-        self.buffer.set_style_scheme(self.style_manager.get_scheme(conf["theme"]))
+        self.buffer.set_style_scheme(
+            self.style_manager.get_scheme(conf["theme"]))
         self.set_show_line_numbers(conf["show-line-numbers"])
         self.set_show_right_margin(conf["show-right-line"])
         self.set_right_margin_position(conf["right-line-pos"])
@@ -153,7 +154,8 @@ class View(GtkSource.View):
             start, end = self.buffer.get_selection_bounds()
             if self.buffer.get_text(start, end, False) == text_search:
                 self.buffer.delete_selection(True, True)
-                self.buffer.insert_interactive_at_cursor(text_replace, -1, True)
+                self.buffer.insert_interactive_at_cursor(
+                    text_replace, -1, True)
 
                 self.search(text_search, True)
 
@@ -163,7 +165,7 @@ class View(GtkSource.View):
         end = self.buffer.get_end_iter()
         match = start.forward_search(text, 0, end)
 
-        if match != None:
+        if match is not None:
             match_start, match_end = match
             self.buffer.apply_tag(self.tag_search, match_start, match_end)
             self.search_and_mark(text, match_end)
@@ -185,7 +187,7 @@ class View(GtkSource.View):
 
                 if _start is not None and _end is not None:
                     if match_end.get_offset() == _end.get_offset() and \
-                        match_start.get_offset() == _start.get_offset():
+                            match_start.get_offset() == _start.get_offset():
 
                         self.select_text(text, _end, True)
                         return
@@ -243,4 +245,3 @@ class View(GtkSource.View):
 
     def emit_title_changed(self):
         self.emit("title-changed", self.get_file_name())
-

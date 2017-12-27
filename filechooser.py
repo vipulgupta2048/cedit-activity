@@ -77,10 +77,9 @@ class FileChooser(Gtk.Window):
         scrolled.add(self.view)
 
         self._gfile = Gio.File.new_for_path(self.folder)
-        self._file_monitor = Gio.File.monitor(self._gfile, Gio.FileMonitorFlags.NONE, None)
+        self._file_monitor = Gio.File.monitor(
+                self._gfile, Gio.FileMonitorFlags.NONE, None)
         self._file_monitor.connect("changed", self.__files_changed_cb)
-
-        #GObject.timeout_add(500, self.check_files)
 
     def __files_changed_cb(self, monitor, file, o, event):
         if event == Gio.FileMonitorEvent.DELETED:
@@ -102,7 +101,8 @@ class FileChooser(Gtk.Window):
 
         folders, files = utils.split_directory_content(self.folder, self.files)
 
-        # We can't use folders.index/files.index because it always include hidden directories/files
+        # We can't use folders.index/files.index because it always include
+        # hidden directories/files
         index = 0
 
         # Include directories in case path is a file because all files are
@@ -120,7 +120,9 @@ class FileChooser(Gtk.Window):
         if os.path.isfile(path):
             for _path in files:
                 name = utils.get_path_name(_path)
-                if utils.is_hidden_filename(name) and not self.show_hidden_files:
+                if utils.is_hidden_filename(name) and \
+                        not self.show_hidden_files:
+
                     continue
 
                 if name == filename:
@@ -128,7 +130,8 @@ class FileChooser(Gtk.Window):
 
                 index += 1
 
-        self.model.insert(index, [filename, utils.get_pixbuf_from_path(path), path])
+        self.model.insert(
+                index, [filename, utils.get_pixbuf_from_path(path), path])
 
     def __remove_item(self, path):
         filename = os.path.basename(path)
@@ -199,7 +202,8 @@ class FileChooserOpen(FileChooser):
 
     def __make_toolbar(self):
         self.toolbar = Gtk.Toolbar()
-        self.toolbar.modify_bg(Gtk.StateType.NORMAL, style.COLOR_TOOLBAR_GREY.get_gdk_color())
+        self.toolbar.modify_bg(
+                Gtk.StateType.NORMAL, style.COLOR_TOOLBAR_GREY.get_gdk_color())
 
         self.go_up_button = ToolButton(icon_name="go-up")
         self.go_up_button.props.accelerator = "<Alt>S"
@@ -329,7 +333,6 @@ class FileChooserOpen(FileChooser):
         alert = TimeoutAlert(10)
         alert.props.title = G.TEXT_FILE_NOT_EXISTS1
         alert.props.msg = G.TEXT_FILE_NOT_EXISTS2
-        image = Gtk.Image.new_from_stock(Gtk.STOCK_OK, Gtk.IconSize.MENU)
 
         hbox = alert.get_children()[0]
         buttonbox = hbox.get_children()[1]
@@ -546,7 +549,8 @@ class FileChooserSave(FileChooser):
         alert = Alert()
         alert.props.title = G.TEXT_FILE_ALREADY_EXISTS
         alert.props.msg = G.TEXT_OVERWRITE_QUESTION.replace("****", path)
-        cancel = Gtk.Image.new_from_icon_name("dialog-cancel", Gtk.IconSize.MENU)
+        cancel = Gtk.Image.new_from_icon_name(
+                "dialog-cancel", Gtk.IconSize.MENU)
         save = Gtk.Image.new_from_icon_name("filesave", Gtk.IconSize.MENU)
         alert.add_button(Gtk.ResponseType.NO, _("Cancel"), icon=cancel)
         alert.add_button(Gtk.ResponseType.YES, _("Save"), icon=save)
@@ -585,7 +589,8 @@ class FileChooserSave(FileChooser):
         try:
             path = view.get_path_at_pos(int(event.x), int(event.y))
             iter = self.model.get_iter(path)
-            directory = os.path.join(self.folder, self.model.get_value(iter, 0))
+            directory = os.path.join(
+                    self.folder, self.model.get_value(iter, 0))
 
             if event.type.value_name == "GDK_2BUTTON_PRESS":
                 if os.path.isdir(directory):

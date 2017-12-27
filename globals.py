@@ -2,7 +2,6 @@
 
 import os
 from gettext import gettext as _
-from ConfigParser import ConfigParser
 
 from gi.repository import Gdk
 from gi.repository import GtkSource
@@ -10,14 +9,17 @@ from gi.repository import GtkSource
 from sugar3 import env
 
 TEXT_FILE_NOT_SAVED = _("This file has not saved.")
-TEXT_MUST_SAVE = _("You must save this file to print.")
+TEXT_MUST_SAVE = _("You must save this file to print it.")
 TEXT_SAVE_FILE = _("Save changes to document **** before closing?")
-TEXT_IF_NOT_SAVE = _("If you do not save, changes will be lost forever.")
-TEXT_HAVE_NOT_PERMISSIONS = _("You do not have sufficient permissions to write this file")
-TEXT_SAVE_CHANGES_QUESTION = _("Save changes to document **** before closing?")
-TEXT_LOST_FOREVER = _("If you do not save, changes will be lost forever.")
+TEXT_IF_NOT_SAVE = \
+    _("If you do not save this file, changes will be lost forever.")
+TEXT_HAVE_NOT_PERMISSIONS = \
+    _("You do not have sufficient permissions to write this file.")
+TEXT_SAVE_CHANGES_QUESTION = \
+    _("Save changes to document **** before closing?")
 TEXT_FILE_NOT_EXISTS1 = _("This file not exists.")
-TEXT_FILE_NOT_EXISTS2 = _("Apparently you've selected a file that does not exist.")
+TEXT_FILE_NOT_EXISTS2 = \
+    _("Apparently you've selected a file that does not exist.")
 TEXT_ERROR_CREATING_FOLDER = _("Error creating the folder.")
 TEXT_FILE_ALREADY_EXISTS = _("This file is already exists.")
 TEXT_OVERWRITE_QUESTION = _("**** already exists. Overwrite it?")
@@ -89,4 +91,3 @@ HEIGHT = (screen.get_height() / 6) * 5
 DEFAULT_FONTS = ["Sans", "Serif", "Monospace"]
 USER_FONTS_FILE_PATH = env.get_profile_path("fonts")
 GLOBAL_FONTS_FILE_PATH = "/etc/sugar_fonts"
-

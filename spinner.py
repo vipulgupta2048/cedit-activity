@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
 #   spinner.py por:
 #   Cristian García <cristian99garcia@gmail.com>
 #
@@ -19,7 +19,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from gi.repository import Gtk
-from gi.repository import Gdk
 from gi.repository import Pango
 from gi.repository import GObject
 
@@ -82,19 +81,23 @@ class Spinner(Gtk.ToolItem):
         self.button_up.add(label)
 
         radius = 2 * subcell_size
-        theme_up = "GtkButton {border-radius:0px %dpx %dpx 0px;}" % (radius, radius)
+        theme_up = \
+            "GtkButton {border-radius:0px %dpx %dpx 0px;}" % (radius, radius)
         css_provider_up = Gtk.CssProvider()
         css_provider_up.load_from_data(theme_up)
 
         style_context = self.button_up.get_style_context()
-        style_context.add_provider(css_provider_up, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        style_context.add_provider(
+            css_provider_up, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        theme_down = "GtkButton {border-radius: %dpx 0px 0px %dpx;}" % (radius, radius)
+        theme_down = \
+            "GtkButton {border-radius: %dpx 0px 0px %dpx;}" % (radius, radius)
         css_provider_down = Gtk.CssProvider()
         css_provider_down.load_from_data(theme_down)
 
         style_context = self.button_down.get_style_context()
-        style_context.add_provider(css_provider_down, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        style_context.add_provider(
+            css_provider_down, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         self.show_all()
 
@@ -109,4 +112,3 @@ class Spinner(Gtk.ToolItem):
         self.button_down.set_sensitive(self.actual_value > self.min_value)
         self.label.set_text(str(self.actual_value))
         self.emit("value-changed", self.actual_value)
-

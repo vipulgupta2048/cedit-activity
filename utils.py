@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
 #   utils.py por:
 #   Cristian García <cristian99garcia@gmail.com>
 #
@@ -21,14 +21,11 @@
 import os
 import globals as G
 
+from ConfigParser import ConfigParser
+
 from gi.repository import Gtk
-from gi.repository import Gdk
 from gi.repository import Gio
-from gi.repository import Pango
-from gi.repository import GdkX11
-from gi.repository import GObject
 from gi.repository import GdkPixbuf
-from gi.repository import GtkSource
 
 
 def make_separator(expand=True):
@@ -69,7 +66,8 @@ def get_pixbuf_from_path(path, size=62):
             if cfg.has_option("Desktop Entry", "Icon"):
                 if "/" in cfg.get("Desktop Entry", "Icon"):
                     d = cfg.get("Desktop Entry", "Icon")
-                    return GdkPixbuf.Pixbuf.new_from_file_at_size(d, size, size)
+                    return GdkPixbuf.Pixbuf.new_from_file_at_size(
+                        d, size, size)
 
                 else:
                     return icon_theme.load_icon(
@@ -83,7 +81,7 @@ def get_pixbuf_from_path(path, size=62):
                 return icon_theme.choose_icon(types, size, 0).load_icon()
 
             except:
-                #pixbuf = icon_theme.load_icon(icon, size, 0)
+                # pixbuf = icon_theme.load_icon(icon, size, 0)
                 pass
 
     return pixbuf
