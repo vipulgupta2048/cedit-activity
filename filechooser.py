@@ -42,6 +42,7 @@ class FileChooser(Gtk.Window):
     def __init__(self, folder=None):
         Gtk.Window.__init__(self)
 
+        self.entries = []
         self.model = Gtk.ListStore(str, GdkPixbuf.Pixbuf, str)
 
         self.folder = folder
@@ -64,6 +65,8 @@ class FileChooser(Gtk.Window):
 
         self.add_events(Gdk.EventMask.KEY_RELEASE_MASK)
 
+        self.connect("key-release-event", self.__key_release_event_cb)
+
         self.vbox = Gtk.VBox()
         self.add(self.vbox)
 
@@ -74,14 +77,40 @@ class FileChooser(Gtk.Window):
         self.view.set_model(self.model)
         self.view.set_text_column(0)
         self.view.set_pixbuf_column(1)
+        self.view.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
         scrolled.add(self.view)
 
-        self._gfile = Gio.File.new_for_path(self.folder)
-        self._file_monitor = Gio.File.monitor(
-                self._gfile, Gio.FileMonitorFlags.NONE, None)
-        self._file_monitor.connect("changed", self.__files_changed_cb)
+        self.go_up_button = ToolButton(icon_name="go-up")
+        self.go_up_button.props.accelerator = "<Alt>S"
+        self.go_up_button.set_tooltip(_("Go to pather directory"))
+        self.go_up_button.connect("clicked", self.go_up)
 
-    def __files_changed_cb(self, monitor, file, o, event):
+        self.entry = Gtk.Entry()
+        self.entry.set_size_request(300, -1)
+        self.entry.set_text(self.folder)
+        self.entries.append(self.entry)
+
+        self._gfile = None
+        self._file_monitor = None
+        self._files_changed_idx = None
+
+        self.set_directory(self.folder)
+
+    def __key_release_event_cb(self, widget, event):
+        if event.keyval == Gdk.KEY_Return:
+            self._open_path()
+
+        elif event.keyval == Gdk.KEY_BackSpace:
+            for entry in self.entries:
+                if entry.has_focus():
+                    return
+
+            self.go_up()
+
+        elif event.keyval == Gdk.KEY_Escape:
+            self.close()
+
+    def __files_changed_cb(self, monitor, file, other_file, event):
         if event == Gio.FileMonitorEvent.DELETED:
             if file.equal(Gio.File.new_for_path(self.folder)):
                 self.go_up()
@@ -141,8 +170,46 @@ class FileChooser(Gtk.Window):
                 self.model.remove(row.iter)
                 break
 
-    def go_up(self, button=None, _return=None):
-        pass
+    def set_directory(self, path):
+        if self._files_changed_idx is not None:
+            self._file_monitor.disconnect(self._files_changed_idx)
+            del self._gfile
+            del self._file_monitor
+
+        self.folder = path
+        self.check_files()
+
+        self._gfile = Gio.File.new_for_path(self.folder)
+        self._file_monitor = Gio.File.monitor(
+                self._gfile, Gio.FileMonitorFlags.NONE, None)
+        self._files_changed_idx = \
+            self._file_monitor.connect("changed", self.__files_changed_cb)
+
+    def go_up(self, button=None, _return=False):
+        path = "/"
+        folders = []
+
+        if self.folder == "/":
+            return
+
+        for folder in self.folder.split("/"):
+            if not folder:
+                continue
+
+            folders.append(folder)
+
+        if not folders:
+            return
+
+        for folder in folders[:-1]:
+            if folder:
+                path += folder + "/"
+
+        if not _return:
+            self.set_directory(path)
+
+        else:
+            return path
 
     def show_folder(self):
         folders, files = utils.get_directory_content(self.folder)
@@ -192,8 +259,7 @@ class FileChooserOpen(FileChooser):
         self.view.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self.view.connect("selection-changed", self.__selection_changed)
         self.view.connect("button-press-event", self.__button_press_event_cb)
-
-        self.connect("key-release-event", self.__key_release_event_cb)
+        self.entry.connect("activate", self._open_path_from_entry)
 
         self.__make_toolbar()
         self.show_folder()
@@ -205,10 +271,6 @@ class FileChooserOpen(FileChooser):
         self.toolbar.modify_bg(
                 Gtk.StateType.NORMAL, style.COLOR_TOOLBAR_GREY.get_gdk_color())
 
-        self.go_up_button = ToolButton(icon_name="go-up")
-        self.go_up_button.props.accelerator = "<Alt>S"
-        self.go_up_button.set_tooltip(_("Go to pather directory"))
-        self.go_up_button.connect("clicked", self.go_up)
         self.toolbar.insert(self.go_up_button, -1)
 
         self.toolbar.insert(Gtk.SeparatorToolItem(), -1)
@@ -222,10 +284,6 @@ class FileChooserOpen(FileChooser):
         self.toolbar.insert(Gtk.SeparatorToolItem(), -1)
 
         item = Gtk.ToolItem()
-        self.entry = Gtk.Entry()
-        self.entry.set_size_request(300, -1)
-        self.entry.set_text(self.folder)
-        self.entry.connect("activate", self.__open_path_from_entry)
         item.add(self.entry)
         self.toolbar.insert(item, -1)
 
@@ -237,7 +295,7 @@ class FileChooserOpen(FileChooser):
         self.button_open = ToolButton(icon_name="fileopen")
         self.button_open.set_tooltip(_("Open selected file"))
         self.button_open.set_sensitive(False)
-        self.button_open.connect("clicked", self.__open_path)
+        self.button_open.connect("clicked", self._open_path)
         self.toolbar.insert(self.button_open, -1)
 
         self.close_button = ToolButton(icon_name="dialog-cancel")
@@ -246,103 +304,9 @@ class FileChooserOpen(FileChooser):
 
         self.vbox.pack_start(self.toolbar, False, False, 0)
 
-    def __key_release_event_cb(self, widget, event):
-        if event.keyval == Gdk.KEY_Return:
-            self.__open_path()
-
-        elif event.keyval == Gdk.KEY_BackSpace:
-            if not self.entry.has_focus():
-                self.go_up()
-
-        elif event.keyval == Gdk.KEY_Escape:
-            self.close()
-
-    def go_up(self, button=None, _return=False):
-        path = "/"
-        folders = []
-
-        if self.folder == "/":
-            return
-
-        for folder in self.folder.split("/"):
-            if not folder:
-                continue
-
-            folders.append(folder)
-
-        if not folders:
-            return
-
-        for folder in folders[:-1]:
-            if folder:
-                path += folder + "/"
-
-        if not _return:
-            self.folder = path
-            self.check_files()
-
-        else:
-            return path
-
     def __show_hidden_files(self, button):
         self.show_hidden_files = button.get_active()
         self.show_folder()
-
-    def __open_path(self, button=None):
-        files = []
-        directory = None
-
-        for item in self.view.get_selected_items():
-            iter = self.model.get_iter(item)
-            path = os.path.join(self.folder, self.model.get_value(iter, 0))
-
-            if os.path.isfile(path):
-                files.append(path)
-
-            elif os.path.isdir(path) and not directory:
-                directory = path
-
-        if files:
-            for path in files:
-                GObject.idle_add(self.emit, "open-file", path)
-                self.emit("open-file", path)
-                self.selected_path = None
-
-            self.destroy()
-
-        else:
-            if directory:
-                self.folder = directory
-
-    def __open_path_from_entry(self, entry):
-        path = self.entry.get_text()
-
-        if not os.path.exists(path):
-            self.create_alert(path)
-            return
-
-        if os.path.isdir(path):
-            self.folder = path
-            self.check_files()
-
-        elif os.path.isfile(path):
-            self.emit("open-file", path)
-            self.destroy()
-
-    def create_alert(self, path):
-        alert = TimeoutAlert(10)
-        alert.props.title = G.TEXT_FILE_NOT_EXISTS1
-        alert.props.msg = G.TEXT_FILE_NOT_EXISTS2
-
-        hbox = alert.get_children()[0]
-        buttonbox = hbox.get_children()[1]
-        button = buttonbox.get_children()[0]
-        buttonbox.remove(button)
-
-        alert.connect("response", self.__alert_response)
-
-        self.vbox.pack_start(alert, False, False, 0)
-        self.vbox.reorder_child(alert, 2)
 
     def __alert_response(self, alert, response):
         self.vbox.remove(alert)
@@ -371,7 +335,7 @@ class FileChooserOpen(FileChooser):
 
             if event.type.value_name == "GDK_2BUTTON_PRESS":
                 if os.path.isdir(directory):
-                    self.folder = directory
+                    self.set_directory(directory)
 
                 elif os.path.isfile(directory):
                     self.emit("open-file", directory)
@@ -380,6 +344,62 @@ class FileChooserOpen(FileChooser):
         except TypeError:
             self.selected_path = None
             self.button_open.set_sensitive(False)
+
+    def create_alert(self, path):
+        alert = TimeoutAlert(10)
+        alert.props.title = G.TEXT_FILE_NOT_EXISTS1
+        alert.props.msg = G.TEXT_FILE_NOT_EXISTS2
+
+        hbox = alert.get_children()[0]
+        buttonbox = hbox.get_children()[1]
+        button = buttonbox.get_children()[0]
+        buttonbox.remove(button)
+
+        alert.connect("response", self.__alert_response)
+
+        self.vbox.pack_start(alert, False, False, 0)
+        self.vbox.reorder_child(alert, 2)
+
+    def _open_path(self, button=None):
+        files = []
+        directory = None
+
+        for item in self.view.get_selected_items():
+            iter = self.model.get_iter(item)
+            path = self.model.get_value(iter, 2)
+
+            if os.path.isfile(path):
+                files.append(path)
+
+            elif os.path.isdir(path) and not directory:
+                directory = path
+
+        if files:
+            for path in files:
+                GObject.idle_add(self.emit, "open-file", path)
+                self.emit("open-file", path)
+                self.selected_path = None
+
+            self.destroy()
+
+        else:
+            if directory:
+                self.folder = directory
+
+    def _open_path_from_entry(self, entry):
+        path = self.entry.get_text()
+
+        if not os.path.exists(path):
+            self.create_alert(path)
+            return
+
+        if os.path.isdir(path):
+            self.folder = path
+            self.check_files()
+
+        elif os.path.isfile(path):
+            self.emit("open-file", path)
+            self.destroy()
 
 
 class FileChooserSave(FileChooser):
@@ -394,6 +414,7 @@ class FileChooserSave(FileChooser):
         self.view.set_selection_mode(Gtk.SelectionMode.SINGLE)
         self.view.connect("selection-changed", self.__selection_changed)
         self.view.connect("button-press-event", self.__button_press_event_cb)
+        self.entry.connect("activate", self._save_path_from_entry)
 
         self.connect("key-release-event", self.__key_release_event_cb)
 
@@ -407,8 +428,6 @@ class FileChooserSave(FileChooser):
         self.toolbar.modify_bg(
             Gtk.StateType.NORMAL, style.COLOR_TOOLBAR_GREY.get_gdk_color())
 
-        self.go_up_button = ToolButton(icon_name="go-up")
-        self.go_up_button.connect("clicked", self.go_up)
         self.toolbar.insert(self.go_up_button, -1)
 
         self.toolbar.insert(Gtk.SeparatorToolItem(), -1)
@@ -419,10 +438,6 @@ class FileChooserSave(FileChooser):
         self.toolbar.insert(self.button_new_folder, -1)
 
         item = Gtk.ToolItem()
-        self.entry = Gtk.Entry()
-        self.entry.set_size_request(300, -1)
-        self.entry.set_text(self.folder)
-        self.entry.connect("activate", self.__save_path_from_entry)
         item.add(self.entry)
         self.toolbar.insert(item, -1)
 
@@ -438,6 +453,7 @@ class FileChooserSave(FileChooser):
         self.entry_name.connect("activate", self.__name_selected)
         item.add(self.entry_name)
         self.toolbar.insert(item, -1)
+        self.entries.append(self.entry_name)
 
         self.button_save = ToolButton(icon_name="save-as")
         self.button_save.connect("clicked", self.__save_path_from_button)
@@ -460,31 +476,6 @@ class FileChooserSave(FileChooser):
 
         elif event.keyval == Gdk.KEY_Escape:
             self.close()
-
-    def go_up(self, button=None, _return=False):
-        path = "/"
-        folders = []
-
-        if self.folder == "/":
-            return
-
-        for folder in self.folder.split("/"):
-            if not folder:
-                continue
-            folders.append(folder)
-
-        if not folders:
-            return
-
-        for folder in folders[:-1]:
-            if folder:
-                path += folder + "/"
-
-        if _return:
-            return path
-
-        self.folder = path
-        self.check_files()
 
     def create_folder(self, widget):
         self.button_new_folder.set_sensitive(False)
@@ -527,9 +518,9 @@ class FileChooserSave(FileChooser):
 
     def __name_selected(self, entry=None):
         path = os.path.join(self.folder, self.entry_name.get_text())
-        self.__save_path_from_entry(path=path)
+        self._save_path_from_entry(path=path)
 
-    def __save_path_from_entry(self, entry=None, path=None):
+    def _save_path_from_entry(self, entry=None, path=None):
         if not path:
             path = self.entry.get_text()
 
