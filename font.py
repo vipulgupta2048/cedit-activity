@@ -244,8 +244,11 @@ class FontSize(Gtk.ToolItem):
         self._default_size = 14
         self._font_size = self._default_size
 
-        self._size_label = Gtk.Label(str(self._font_size))
-        hbox.pack_start(self._size_label, False, False, 10)
+        self._size_entry = Gtk.Entry()
+        self._size_entry.set_text(str(self._font_size))
+        self._size_entry.set_width_chars(3)
+        self._size_entry.connect('activate', self.__entry_cb)
+        hbox.pack_start(self._size_entry, False, False, 5)
 
         self._size_up = Gtk.Button()
         self._size_up.set_can_focus(False)
@@ -272,6 +275,21 @@ class FontSize(Gtk.ToolItem):
                 css_provider_down, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         self.show_all()
+    def __entry_cb(self, entry):
+        print(entry)
+        try:
+            self._font_size = int(entry.get_text())
+            if self._font_size > self._font_sizes[-1]:
+                self._font_size = self._font_sizes[-1]
+                entry.set_text(str(self._font_sizes[-1]))
+            elif self._font_size < self._font_sizes[0]:
+                self._font_size = self._font_sizes[0]
+                entry.set_text(str(self._font_sizes[0]))
+        except ValueError:
+            entry.set_text(str(self._font_size))
+        self._size_down.set_sensitive(self._font_size != self._font_sizes[0])
+        self._size_up.set_sensitive(self._font_size != self._font_sizes[-1])
+        self.emit("changed", self._font_size)
 
     def __font_sizes_cb(self, button, increase):
         if self._font_size in self._font_sizes:
@@ -285,10 +303,13 @@ class FontSize(Gtk.ToolItem):
                     i -= 1
 
         else:
-            i = self._font_sizes.index(self._default_size)
+            for font_size in self._font_sizes:
+                if self._font_size < font_size:
+                    i = self._font_sizes.index(font_size)
+                    break
 
         self._font_size = self._font_sizes[i]
-        self._size_label.set_text(str(self._font_size))
+        self._size_entry.set_text(str(self._font_size))
         self._size_down.set_sensitive(i != 0)
         self._size_up.set_sensitive(i < len(self._font_sizes) - 1)
         self.emit("changed", self._font_size)
@@ -304,7 +325,7 @@ class FontSize(Gtk.ToolItem):
                 size = self._font_sizes[-1]
 
         self._font_size = size
-        self._size_label.set_text(str(self._font_size))
+        self._size_entry.set_text(str(self._font_size))
 
         i = self._font_sizes.index(self._font_size)
         self._size_down.set_sensitive(i != 0)
