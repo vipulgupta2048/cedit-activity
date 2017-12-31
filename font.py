@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import utils
 import globals as G
 
 import os
@@ -64,6 +65,7 @@ class FontComboBox(Gtk.ToolItem):
 
         bt = Gtk.Button("")
         bt.set_can_focus(False)
+        bt.set_valign(Gtk.Align.CENTER)
         bt.remove(bt.get_children()[0])
 
         box = Gtk.HBox()
@@ -221,71 +223,59 @@ class FontSize(Gtk.ToolItem):
         self._font_sizes = [
             8, 9, 10, 11, 12, 14, 16, 20, 22, 24, 26, 28, 36, 48, 72]
 
-        if style.zoom(100) == 100:
-            subcell_size = 15
-            default_padding = 6
-
-        else:
-            subcell_size = 11
-            default_padding = 4
-
-        vbox = Gtk.VBox()
-        self.add(vbox)
+        self.set_margin_left(5)
+        self.connect("size-allocate", self.__size_allocate_cb)
 
         hbox = Gtk.HBox()
-        vbox.pack_start(hbox, True, True, default_padding)
+        hbox.set_valign(Gtk.Align.CENTER)
+        Gtk.StyleContext.add_class(hbox.get_style_context(), "linked")
+        self.add(hbox)
 
         self._size_down = Gtk.Button()
         self._size_down.set_can_focus(False)
         self._size_down.set_image(Icon(icon_name="resize-"))
         self._size_down.connect("clicked", self.__font_sizes_cb, False)
-        hbox.pack_start(self._size_down, False, False, 5)
+        hbox.pack_start(self._size_down, False, False, 0)
+        utils.set_border_radius(self._size_down, r1=90, r4=90)
 
         self._default_size = 14
         self._font_size = self._default_size
 
         self._size_entry = Gtk.Entry()
+        self._size_entry.props.xalign = 0.5
         self._size_entry.set_text(str(self._font_size))
         self._size_entry.set_width_chars(3)
-        self._size_entry.connect('activate', self.__entry_cb)
-        hbox.pack_start(self._size_entry, False, False, 5)
+        self._size_entry.connect("activate", self.__entry_cb)
+        hbox.pack_start(self._size_entry, False, False, 0)
+        utils.set_border_radius(self._size_entry)
 
         self._size_up = Gtk.Button()
         self._size_up.set_can_focus(False)
         self._size_up.set_image(Icon(icon_name="resize+"))
         self._size_up.connect("clicked", self.__font_sizes_cb, True)
-        hbox.pack_start(self._size_up, False, False, 5)
-
-        radius = 2 * subcell_size
-        theme_up = \
-            "GtkButton {border-radius:0px %dpx %dpx 0px;}" % (radius, radius)
-        css_provider_up = Gtk.CssProvider()
-        css_provider_up.load_from_data(theme_up)
-
-        style_context = self._size_up.get_style_context()
-        style_context.add_provider(
-            css_provider_up, Gtk.STYLE_PROVIDER_PRIORITY_USER)
-
-        theme_down = \
-            "GtkButton {border-radius: %dpx 0px 0px %dpx;}" % (radius, radius)
-        css_provider_down = Gtk.CssProvider()
-        css_provider_down.load_from_data(theme_down)
-        style_context = self._size_down.get_style_context()
-        style_context.add_provider(
-                css_provider_down, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        hbox.pack_start(self._size_up, False, False, 0)
+        utils.set_border_radius(self._size_up, r2=90, r3=90)
 
         self.show_all()
+
+    def __size_allocate_cb(self, button, rect):
+        self._size_entry.set_size_request(1,
+            self._size_up.get_allocation().height)
+
     def __entry_cb(self, entry):
         try:
             self._font_size = int(entry.get_text())
             if self._font_size > self._font_sizes[-1]:
                 self._font_size = self._font_sizes[-1]
                 entry.set_text(str(self._font_sizes[-1]))
+
             elif self._font_size < self._font_sizes[0]:
                 self._font_size = self._font_sizes[0]
                 entry.set_text(str(self._font_sizes[0]))
+
         except ValueError:
             entry.set_text(str(self._font_size))
+
         self._size_down.set_sensitive(self._font_size != self._font_sizes[0])
         self._size_up.set_sensitive(self._font_size != self._font_sizes[-1])
         self.emit("changed", self._font_size)

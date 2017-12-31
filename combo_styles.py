@@ -40,6 +40,7 @@ class ComboStyles(Gtk.ToolItem):
         for style in self.styles:
             self.combo.append_text(style)
 
+        self.combo.set_valign(Gtk.Align.CENTER)
         self.combo.set_active(self.styles.index(selected_style))
         self.combo.connect("changed", self.__theme_changed)
 

@@ -21,7 +21,6 @@
 import utils
 from font import FontSize
 from font import FontComboBox
-from spinner import Spinner
 from combo_styles import ComboStyles
 
 from gettext import gettext as _
@@ -161,14 +160,14 @@ class ViewToolbar(Gtk.Toolbar):
 
         self.button = ToolbarButton(page=self, icon_name="toolbar-view")
 
+        combo_font = FontComboBox(conf["font"])
+        combo_font.connect("changed", self.__font_changed_cb)
+        self.insert(combo_font, -1)
+
         item_font_size = FontSize()
         item_font_size.set_font_size(conf["font-size"])
         item_font_size.connect("changed", self.__font_size_changed_cb)
         self.insert(item_font_size, -1)
-
-        combo_font = FontComboBox(conf["font"])
-        combo_font.connect("changed", self.__font_changed_cb)
-        self.insert(combo_font, -1)
 
         self.insert(utils.make_separator(False), -1)
 
@@ -186,8 +185,6 @@ class ViewToolbar(Gtk.Toolbar):
         button_right_line.connect("toggled", self.__show_right_line_changed_cb)
         self.insert(button_right_line, -1)
 
-        toolItem1 = Gtk.ToolItem()
-        self.spinner_right_line =  Gtk.SpinButton()
         adjustement = Gtk.Adjustment(
             value=conf["right-line-pos"],
             lower=1,
@@ -196,8 +193,17 @@ class ViewToolbar(Gtk.Toolbar):
             page_increment=5,
             page_size=0,
         )
+
+        toolItem1 = Gtk.ToolItem()
+        self.spinner_right_line = Gtk.SpinButton()
+        self.spinner_right_line.set_margin_left(5)
         self.spinner_right_line.set_adjustment(adjustement)
-        self.spinner_right_line.connect('notify::value', self.__right_line_pos_changed_cb)
+
+        # Ensuring that the value is displayed when starting:
+        self.spinner_right_line.set_value(conf["right-line-pos"])
+        self.spinner_right_line.connect('notify::value',
+            self.__right_line_pos_changed_cb)
+
         toolItem1.add(self.spinner_right_line)
         self.insert(toolItem1, -1)
 
