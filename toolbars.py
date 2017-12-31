@@ -186,11 +186,20 @@ class ViewToolbar(Gtk.Toolbar):
         button_right_line.connect("toggled", self.__show_right_line_changed_cb)
         self.insert(button_right_line, -1)
 
-        self.spinner_right_line = Spinner(conf["right-line-pos"], 1, 150)
-        self.spinner_right_line.set_sensitive(conf["show-right-line"])
-        self.spinner_right_line.connect(
-            "value-changed", self.__right_line_pos_changed_cb)
-        self.insert(self.spinner_right_line, -1)
+        toolItem1 = Gtk.ToolItem()
+        self.spinner_right_line =  Gtk.SpinButton()
+        adjustement = Gtk.Adjustment(
+            value=conf["right-line-pos"],
+            lower=1,
+            upper=150,
+            step_increment=1,
+            page_increment=5,
+            page_size=0,
+        )
+        self.spinner_right_line.set_adjustment(adjustement)
+        self.spinner_right_line.connect('notify::value', self.__right_line_pos_changed_cb)
+        toolItem1.add(self.spinner_right_line)
+        self.insert(toolItem1, -1)
 
         self.insert(utils.make_separator(False), -1)
 
@@ -212,8 +221,8 @@ class ViewToolbar(Gtk.Toolbar):
     def __show_right_line_changed_cb(self, button):
         self.emit("show-right-line-changed", button.get_active())
 
-    def __right_line_pos_changed_cb(self, spinner, value):
-        self.emit("right-line-pos-changed", value)
+    def __right_line_pos_changed_cb(self, spinner, user_data):
+        self.emit("right-line-pos-changed", spinner.props.value)
 
     def __theme_changed_cb(self, combo, theme):
         self.emit("theme-changed", theme)
