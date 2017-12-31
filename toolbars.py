@@ -222,7 +222,6 @@ class ViewToolbar(Gtk.Toolbar):
         self.emit("show-right-line-changed", button.get_active())
 
     def __right_line_pos_changed_cb(self, spinner, user_data):
-        print(spinner.props.value)
         self.emit("right-line-pos-changed", spinner.props.value)
 
     def __theme_changed_cb(self, combo, theme):

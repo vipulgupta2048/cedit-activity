@@ -276,7 +276,6 @@ class FontSize(Gtk.ToolItem):
 
         self.show_all()
     def __entry_cb(self, entry):
-        print(entry)
         try:
             self._font_size = int(entry.get_text())
             if self._font_size > self._font_sizes[-1]:
