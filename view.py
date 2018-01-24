@@ -204,14 +204,14 @@ class View(GtkSource.View):
             except RuntimeError:
                 pass
 
-    def set_file_suspend(self, suspend_path, path):
-        if os.path.isfile(suspend_path):
-            with open(suspend_path, "r") as file:
+    def set_file_instance(self, instance_path, path):
+        if os.path.isfile(instance_path):
+            with open(instance_path, "r") as file:
                 modified = int(file.readline().strip())
                 text = file.read()
 
             self.buffer.set_text(text)
-            self.buffer.set_language_from_file(suspend_path)
+            self.buffer.set_language_from_file(path)
             self.buffer.begin_not_undoable_action()
             self.buffer.end_not_undoable_action()
             self.buffer.set_modified(bool(modified))
@@ -242,7 +242,7 @@ class View(GtkSource.View):
 
             self.set_editable(writable)
 
-    def save_file_suspend(self, path):
+    def save_file_instance(self, path):
         self.buffer.set_language_from_file(path)
         with open(path, "w") as file:
             file.write(str(int(self.buffer.get_modified()))+ "\n")
