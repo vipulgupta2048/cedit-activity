@@ -204,6 +204,26 @@ class View(GtkSource.View):
             except RuntimeError:
                 pass
 
+    def set_file_instance(self, instance_path, path):
+        if os.path.isfile(instance_path):
+            with open(instance_path, "r") as file:
+                modified = int(file.readline().strip())
+                text = file.read()
+
+            self.buffer.set_text(text)
+            self.buffer.set_language_from_file(path)
+            self.buffer.begin_not_undoable_action()
+            self.buffer.end_not_undoable_action()
+            self.buffer.set_modified(bool(modified))
+            if path:
+                self.file = path
+                readable, writable = utils.get_path_access(path)
+            else:
+                writable = True
+
+            self.emit_title_changed()
+            self.set_editable(writable)
+
     def set_file(self, path, _open=True):
         if os.path.isfile(path) and _open:
             with open(path, "r") as file:
@@ -221,6 +241,12 @@ class View(GtkSource.View):
             readable, writable = utils.get_path_access(path)
 
             self.set_editable(writable)
+
+    def save_file_instance(self, path):
+        self.buffer.set_language_from_file(path)
+        with open(path, "w") as file:
+            file.write(str(int(self.buffer.get_modified()))+ "\n")
+            file.write(self.buffer.get_all_text())
 
     def save_file(self, path):
         self.buffer.set_modified(False)

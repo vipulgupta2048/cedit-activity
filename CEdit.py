@@ -18,6 +18,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os
+from os.path import join
 from gettext import gettext as _
 
 import utils
@@ -43,6 +45,8 @@ class CEdit(activity.Activity):
 
     def __init__(self, handle):
         activity.Activity.__init__(self, handle)
+        self.instance_path = join(activity.get_activity_root(),'instance')
+        self.index_file = join(self.instance_path, 'index')
 
         self.get_conf()
 
@@ -122,7 +126,10 @@ class CEdit(activity.Activity):
         self.notebook.connect("page-removed", self.page_removed)
 
         self.vbox.pack_start(self.notebook, True, True, 2)
-        self.new_page()
+        if os.path.exists(self.index_file):
+            self.instance_wake()
+        else:
+            self.new_page()
         button_add.show()
         self.show_all()
 
@@ -224,6 +231,16 @@ class CEdit(activity.Activity):
         file_chooser.connect("open-file", self._open_file_from_chooser)
         file_chooser.show_all()
 
+    def instance_wake(self):
+        with open(self.index_file, 'r') as f:
+            path_list = [path.strip() for path in f.readlines()]
+
+        os.remove(self.index_file)
+        for x in range(len(path_list)):
+            file_path = join(self.instance_path, str(x))
+            self._open_file_from_instance(file_path, path_list[x])
+            os.remove(file_path)
+
     def file_chooser_save(self, widget, force=False, close=False):
         # Force is for "save as"
 
@@ -301,6 +318,11 @@ class CEdit(activity.Activity):
 
             dialog.run()
             dialog.destroy()
+
+    def _open_file_from_instance(self, path, path_set):
+        self.new_page(label=path_set.split('/')[-1])
+        view = self.get_view(idx=-1)
+        view.set_file_instance(path, path_set)
 
     def _open_file_from_chooser(self, widget, path):
         children = self.notebook.get_children()
@@ -461,9 +483,24 @@ class CEdit(activity.Activity):
         self.vbox.remove(self.alert)
 
     def write_file(self, file_path):
-        files = []
+        x = 0
+        views = self.notebook.get_children()
 
-        for scrolled in self.notebook.get_children():
+        with open(self.index_file,'w') as f:
+            for scrolled in views:
+                view = scrolled.get_children()[0]
+                name = view.get_file()
+                if not name:
+                    name = ''
+                path = join(self.instance_path, str(x))
+                f.write(name)
+                view.save_file_instance(path)
+                if not name or x != len(views) - 1:
+                    f.write('\n')
+                x+=1
+
+        files = []
+        for scrolled in views:
             view = scrolled.get_children()[0]
             if view.get_file():
                 files.append(view.get_file)
