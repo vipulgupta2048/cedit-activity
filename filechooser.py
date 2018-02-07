@@ -411,6 +411,7 @@ class FileChooserSave(FileChooser):
     def __init__(self, folder=None):
         FileChooser.__init__(self, folder)
 
+        self.alert = None
         self.view.set_selection_mode(Gtk.SelectionMode.SINGLE)
         self.view.connect("selection-changed", self.__selection_changed)
         self.view.connect("button-press-event", self.__button_press_event_cb)
@@ -497,17 +498,20 @@ class FileChooserSave(FileChooser):
                 self.folder = path
 
             except OSError as msg:
-                alert = Alert()
-                alert.props.title = G.TEXT_ERROR_CREATING_FOLDER
-                alert.props.msg = msg
+                if self.alert:
+                    self.vbox.remove(self.alert)
+                    self.alert = None
+                self.alert = Alert()
+                self.alert.props.title = G.TEXT_ERROR_CREATING_FOLDER
+                self.alert.props.msg = msg
                 image = Gtk.Image.new_from_stock(
                     Gtk.STOCK_OK, Gtk.IconSize.MENU)
-                alert.add_button(Gtk.ResponseType.NO, _("Ok"), icon=image)
+                self.alert.add_button(Gtk.ResponseType.NO, _("Ok"), icon=image)
 
-                alert.connect("response", self.__alert_response)
+                self.alert.connect("response", self.__alert_response)
 
-                self.vbox.pack_start(alert, False, False, 0)
-                self.vbox.reorder_child(alert, 1)
+                self.vbox.pack_start(self.alert, False, False, 0)
+                self.vbox.reorder_child(self.alert, 1)
 
         item = entry.get_parent()
         self.toolbar.remove(item)
@@ -537,19 +541,23 @@ class FileChooserSave(FileChooser):
                 self.destroy()
 
     def create_alert(self, path):
-        alert = Alert()
-        alert.props.title = G.TEXT_FILE_ALREADY_EXISTS
-        alert.props.msg = G.TEXT_OVERWRITE_QUESTION.replace("****", path)
+        if self.alert:
+            self.vbox.remove(self.alert)
+            self.alert = None
+
+        self.alert = Alert()
+        self.alert.props.title = G.TEXT_FILE_ALREADY_EXISTS
+        self.alert.props.msg = G.TEXT_OVERWRITE_QUESTION.replace("****", path)
         cancel = Gtk.Image.new_from_icon_name(
                 "dialog-cancel", Gtk.IconSize.MENU)
         save = Gtk.Image.new_from_icon_name("filesave", Gtk.IconSize.MENU)
-        alert.add_button(Gtk.ResponseType.NO, _("Cancel"), icon=cancel)
-        alert.add_button(Gtk.ResponseType.YES, _("Save"), icon=save)
+        self.alert.add_button(Gtk.ResponseType.NO, _("Cancel"), icon=cancel)
+        self.alert.add_button(Gtk.ResponseType.YES, _("Save"), icon=save)
 
-        alert.connect("response", self.__alert_response, path)
+        self.alert.connect("response", self.__alert_response, path)
 
-        self.vbox.pack_start(alert, False, False, 0)
-        self.vbox.reorder_child(alert, 2)
+        self.vbox.pack_start(self.alert, False, False, 0)
+        self.vbox.reorder_child(self.alert, 2)
 
     def __alert_response(self, alert, response, path):
         if response == Gtk.ResponseType.NO:
@@ -558,6 +566,8 @@ class FileChooserSave(FileChooser):
         elif response == Gtk.ResponseType.YES:
             self.emit("save-file", path)
             self.destroy()
+        self.alert_status = 0
+        self.alert = None
 
     def __selection_changed(self, view):
         if self.view.get_selected_items():
