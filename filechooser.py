@@ -411,7 +411,6 @@ class FileChooserSave(FileChooser):
     def __init__(self, folder=None):
         FileChooser.__init__(self, folder)
 
-        self.alert_status = 0
         self.alert = None
         self.view.set_selection_mode(Gtk.SelectionMode.SINGLE)
         self.view.connect("selection-changed", self.__selection_changed)
@@ -499,7 +498,7 @@ class FileChooserSave(FileChooser):
                 self.folder = path
 
             except OSError as msg:
-                if self.alert_status:
+                if self.alert:
                     self.vbox.remove(self.alert)
                     self.alert = None
                 self.alert = Alert()
@@ -513,7 +512,6 @@ class FileChooserSave(FileChooser):
 
                 self.vbox.pack_start(self.alert, False, False, 0)
                 self.vbox.reorder_child(self.alert, 1)
-                self.alert_status = 2
 
         item = entry.get_parent()
         self.toolbar.remove(item)
@@ -543,7 +541,7 @@ class FileChooserSave(FileChooser):
                 self.destroy()
 
     def create_alert(self, path):
-        if self.alert_status:
+        if self.alert:
             self.vbox.remove(self.alert)
             self.alert = None
 
@@ -560,7 +558,6 @@ class FileChooserSave(FileChooser):
 
         self.vbox.pack_start(self.alert, False, False, 0)
         self.vbox.reorder_child(self.alert, 2)
-        self.alert_status = 1
 
     def __alert_response(self, alert, response, path):
         if response == Gtk.ResponseType.NO:
