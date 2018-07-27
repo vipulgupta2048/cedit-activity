@@ -7,3 +7,4 @@ exec = sugar-activity CEdit.CEdit
 icon = icon
 repository = https://github.com/sugarlabs/cedit-activity
 summary = A text editor for sugar.
+tags = Tools;Documents
